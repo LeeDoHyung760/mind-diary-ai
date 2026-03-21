@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color: #1f2937;
+  background:
+    radial-gradient(circle at top left, rgba(245, 185, 122, 0.22), transparent 30%),
+    radial-gradient(circle at top right, rgba(78, 125, 97, 0.2), transparent 28%),
+    linear-gradient(180deg, #f5efe4 0%, #f8f5ef 42%, #f4f2ee 100%);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  font-family: "Segoe UI", sans-serif;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+@keyframes sidebar-history-up {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-72px);
+  }
+}
+
+@keyframes sidebar-history-down {
+  0% {
+    opacity: 0;
+    transform: translateY(-72px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sidebar-history-exit {
+  animation: sidebar-history-up 520ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.sidebar-history-enter {
+  animation: sidebar-history-down 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes calendar-step-in {
+  0% {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.calendar-step-enter {
+  animation: calendar-step-in 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer components {
+  .panel {
+    @apply rounded-[28px] border border-white/70 bg-white/75 shadow-panel backdrop-blur;
+  }
+
+  .soft-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--theme-glow, rgba(78, 125, 97, 0.35)) transparent;
+  }
+}
