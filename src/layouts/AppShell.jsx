@@ -1,84 +1,137 @@
+import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { useEffect, useRef, useState } from "react";
-import ChatHistoryPanel from "../sections/ChatHistoryPanel";
-import { recommendedSongs } from "../sections/CompanionPanel";
-import { clearCurrentUser, clearGuestUser } from "../lib/authStorage";
-import { getThemeTokens } from "../lib/theme";
 import { useCurrentUser } from "../lib/useCurrentUser";
+import { getThemeTokens } from "../lib/theme";
+import { loadChatsForUser, removeChat, sendChatMessage } from "../services/chatService";
+import { resetToLoginState } from "../services/profileService";
+import { recommendedSongs } from "../sections/CompanionPanel";
+import ChatHistoryPanel from "../sections/ChatHistoryPanel";
 
 const menuItems = [
   { to: "/counseling", label: "상담", icon: "C" },
-  { to: "/analysis", label: "감정분석", icon: "A" },
+  { to: "/analysis", label: "분석", icon: "A" },
 ];
 
-const DEFAULT_CHAT = "그냥 이유 없이 마음이 무거운 날";
 const analysisSummaries = [
   {
     label: "오늘",
     value: "64%",
-    note: "불안과 피로가 함께 보이는 패턴이 가장 많이 나타났습니다.",
+    note: "현재는 예시 데이터입니다. 실제 감정 분석 데이터로 교체할 수 있습니다.",
   },
   {
     label: "어제",
     value: "58%",
-    note: "긴장은 조금 줄었지만 가라앉은 기분이 계속 반복되었습니다.",
+    note: "이 영역은 아직 UI 샘플 상태이며, 이후 서비스 데이터와 연결하면 됩니다.",
   },
 ];
 
 function AppShell() {
   const navigate = useNavigate();
+  const location = useLocation();
   const currentUser = useCurrentUser();
   const theme = getThemeTokens(currentUser);
-  const location = useLocation();
-  const previousPathRef = useRef(location.pathname);
-  const [selectedChat, setSelectedChat] = useState(DEFAULT_CHAT);
-  const [sidebarTransition, setSidebarTransition] = useState(null);
+  const [chatSessions, setChatSessions] = useState([]);
+  const [selectedChatId, setSelectedChatId] = useState(null);
+  const [chatStatus, setChatStatus] = useState("idle");
+  const [chatError, setChatError] = useState("");
   const [selectedAnalysisSong, setSelectedAnalysisSong] = useState(recommendedSongs[0].title);
   const isCounselingPage = location.pathname === "/counseling";
   const isGuest = currentUser?.source === "guest";
   const isLoggedIn = Boolean(currentUser?.id) && !isGuest;
+  const selectedChat = chatSessions.find((chat) => chat.id === selectedChatId) || null;
 
   useEffect(() => {
-    const previousPath = previousPathRef.current;
+    let isActive = true;
 
-    if (previousPath === "/counseling" && location.pathname === "/analysis") {
-      setSidebarTransition("out-up");
+    async function loadChats() {
+      setChatStatus("loading");
+      setChatError("");
 
-      const timeout = window.setTimeout(() => {
-        setSidebarTransition(null);
-      }, 520);
+      try {
+        const chats = await loadChatsForUser(currentUser);
 
-      previousPathRef.current = location.pathname;
-      return () => window.clearTimeout(timeout);
+        if (!isActive) {
+          return;
+        }
+
+        setChatSessions(chats);
+        setSelectedChatId((currentId) => {
+          if (chats.some((chat) => chat.id === currentId)) {
+            return currentId;
+          }
+
+          return chats[0]?.id ?? null;
+        });
+        setChatStatus("ready");
+      } catch (error) {
+        if (!isActive) {
+          return;
+        }
+
+        setChatSessions([]);
+        setSelectedChatId(null);
+        setChatStatus("error");
+        setChatError(error.message);
+      }
     }
 
-    if (previousPath === "/analysis" && location.pathname === "/counseling") {
-      setSidebarTransition("in-down");
+    loadChats();
 
-      const timeout = window.setTimeout(() => {
-        setSidebarTransition(null);
-      }, 520);
-
-      previousPathRef.current = location.pathname;
-      return () => window.clearTimeout(timeout);
-    }
-
-    previousPathRef.current = location.pathname;
-    return undefined;
-  }, [location.pathname]);
+    return () => {
+      isActive = false;
+    };
+  }, [currentUser]);
 
   const handleAuthAction = () => {
-    if (isGuest) {
-      clearGuestUser();
-    } else if (isLoggedIn) {
-      clearCurrentUser();
-    }
-
+    resetToLoginState();
     navigate("/login");
   };
 
+  const handleChatStored = (chat) => {
+    setChatSessions((previousChats) => {
+      const remainingChats = previousChats.filter((item) => item.id !== chat.id);
+      return [chat, ...remainingChats];
+    });
+    setSelectedChatId(chat.id);
+    setChatStatus("ready");
+  };
+
+  const handleSendMessage = async (text) => {
+    const chat = await sendChatMessage(currentUser, selectedChatId, text);
+    handleChatStored(chat);
+  };
+
+  const handleCreateChat = () => {
+    setSelectedChatId(null);
+    setChatStatus("ready");
+    setChatError("");
+  };
+
+  const handleDeleteChat = async (chatId) => {
+    let remainingChats;
+    const nextGuestChats = await removeChat(currentUser, chatId);
+
+    if (nextGuestChats === null) {
+      setChatSessions((previousChats) => {
+        remainingChats = previousChats.filter((chat) => chat.id !== chatId);
+        return remainingChats;
+      });
+    } else {
+      remainingChats = nextGuestChats;
+      setChatSessions(remainingChats);
+    }
+
+    setSelectedChatId((currentId) => {
+      if (currentId !== chatId) {
+        return currentId;
+      }
+
+      return remainingChats?.[0]?.id ?? null;
+    });
+  };
+
   const authLabel = isGuest ? "게스트 종료" : isLoggedIn ? "로그아웃" : "로그인";
-  const accountBadge = isGuest ? "게스트 체험" : isLoggedIn ? "계정 연결됨" : "체험";
+  const accountBadge = isGuest ? "게스트" : isLoggedIn ? "계정" : "체험";
 
   return (
     <div
@@ -166,10 +219,12 @@ function AppShell() {
           <div className="relative mt-5 flex min-h-0 flex-1 flex-col border-t border-slate-100 pt-5">
             {isCounselingPage ? (
               <ChatHistoryPanel
-                selectedChat={selectedChat}
-                onSelectChat={setSelectedChat}
+                chats={chatSessions}
+                selectedChatId={selectedChatId}
+                onSelectChat={setSelectedChatId}
+                onCreateChat={handleCreateChat}
+                onDeleteChat={handleDeleteChat}
                 embedded
-                animationClass={sidebarTransition === "in-down" ? "sidebar-history-enter" : ""}
                 theme={theme}
               />
             ) : (
@@ -225,18 +280,6 @@ function AppShell() {
                     })}
                   </div>
                 </div>
-
-                {sidebarTransition === "out-up" && (
-                  <div className="pointer-events-none absolute inset-0 bg-white/72">
-                    <ChatHistoryPanel
-                      selectedChat={selectedChat}
-                      onSelectChat={setSelectedChat}
-                      embedded
-                      animationClass="sidebar-history-exit"
-                      theme={theme}
-                    />
-                  </div>
-                )}
               </div>
             )}
           </div>
@@ -271,7 +314,16 @@ function AppShell() {
         </aside>
 
         <main className="relative min-w-0 flex-1 overflow-hidden pt-20 md:h-[calc(100vh-3rem)] md:pt-0">
-          <Outlet context={{ selectedChat, setSelectedChat, currentUser, theme }} />
+          <Outlet
+            context={{
+              selectedChat,
+              currentUser,
+              theme,
+              chatStatus,
+              chatError,
+              onSendMessage: handleSendMessage,
+            }}
+          />
         </main>
       </div>
     </div>

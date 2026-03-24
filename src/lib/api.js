@@ -35,4 +35,21 @@ export function updateUserProfile(userId, payload) {
   });
 }
 
+export function getUserChats(userId) {
+  return request(`/users/${userId}/chats`);
+}
+
+export function appendUserChatMessage(userId, payload) {
+  return request(`/users/${userId}/chats/messages`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteUserChat(userId, chatId) {
+  return request(`/users/${userId}/chats/${chatId}`, {
+    method: "DELETE",
+  });
+}
+
 export { API_BASE_URL };

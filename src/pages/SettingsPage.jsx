@@ -1,14 +1,13 @@
 import { useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import SlimeAvatar from "../components/SlimeAvatar";
-import { updateUserProfile } from "../lib/api";
-import { saveCurrentUser, saveGuestUser } from "../lib/authStorage";
 import { avatarOptions } from "../lib/theme";
+import { isGuestUser, saveProfileChanges } from "../services/profileService";
 
 function SettingsPage() {
   const navigate = useNavigate();
   const { currentUser } = useOutletContext();
-  const isGuest = currentUser?.source === "guest";
+  const isGuest = isGuestUser(currentUser);
   const defaultAvatar =
     avatarOptions.find((option) => option.id === currentUser?.avatarStyle) || avatarOptions[0];
 
@@ -31,17 +30,8 @@ function SettingsPage() {
     };
 
     try {
-      if (currentUser?.id && !isGuest) {
-        const response = await updateUserProfile(currentUser.id, payload);
-        saveCurrentUser(response.user);
-      } else {
-        saveGuestUser({
-          ...currentUser,
-          ...payload,
-        });
-      }
-
-      setMessage(isGuest ? "게스트 설정이 현재 기기에 저장되었습니다." : "설정이 저장되었습니다.");
+      await saveProfileChanges(currentUser, payload);
+      setMessage(isGuest ? "현재 브라우저에 저장되었습니다." : "프로필이 저장되었습니다.");
     } catch (error) {
       setErrorMessage(error.message);
     } finally {
@@ -58,20 +48,20 @@ function SettingsPage() {
         <h1 className="mt-3 text-3xl font-bold text-ink">설정</h1>
         <p className="mt-2 text-sm text-slate-500">
           {isGuest
-            ? "게스트 설정은 현재 기기에만 저장되며 게스트 세션 종료 시 함께 지워집니다."
-            : "로그인 사용자의 설정은 백엔드에 동기화되어 앱 전체에 반영됩니다."}
+            ? "게스트 설정은 현재 브라우저에만 저장됩니다."
+            : "로그인한 사용자의 설정은 백엔드를 통해 저장됩니다."}
         </p>
 
         <div className="mt-8 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
           <form onSubmit={handleSave} className="rounded-[28px] bg-slate-50 p-6">
             <label htmlFor="settings-assistant-name" className="text-sm font-semibold text-slate-700">
-              친구 이름
+              동반자 이름
             </label>
             <input
               id="settings-assistant-name"
               value={assistantName}
               onChange={(event) => setAssistantName(event.target.value)}
-              placeholder="예: 마음이"
+              placeholder="동반자의 이름을 입력하세요"
               maxLength={16}
               className="mt-3 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-[color:var(--theme-strong)]"
             />
@@ -169,8 +159,8 @@ function SettingsPage() {
                 <div className="mt-2 text-2xl font-bold text-ink">{assistantName || "마음이"}</div>
                 <p className="mt-3 text-sm leading-6 text-slate-500">
                   {isGuest
-                    ? "이 게스트 프로필은 현재 브라우저 로컬 저장소에만 남습니다."
-                    : "이 로그인 프로필은 백엔드와 동기화됩니다."}
+                    ? "게스트 프로필 데이터는 브라우저 저장소에만 남습니다."
+                    : "로그인한 사용자의 프로필 데이터는 백엔드에 저장됩니다."}
                 </p>
               </div>
             </div>

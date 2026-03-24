@@ -3,11 +3,19 @@ import ChatPanel from "../sections/ChatPanel";
 import CompanionPanel from "../sections/CompanionPanel";
 
 function CounselingPage() {
-  const { selectedChat, currentUser, theme } = useOutletContext();
+  const { selectedChat, currentUser, theme, chatStatus, chatError, onSendMessage } =
+    useOutletContext();
 
   return (
     <div className="grid h-full min-h-0 gap-4 xl:grid-cols-[2fr_1fr]">
-      <ChatPanel selectedChat={selectedChat} currentUser={currentUser} theme={theme} />
+      <ChatPanel
+        selectedChat={selectedChat}
+        currentUser={currentUser}
+        theme={theme}
+        chatStatus={chatStatus}
+        chatError={chatError}
+        onSendMessage={onSendMessage}
+      />
       <CompanionPanel currentUser={currentUser} theme={theme} />
     </div>
   );
