@@ -1,5 +1,4 @@
 import { useState } from "react";
-import SlimeAvatar from "../components/SlimeAvatar";
 import { getThemeTokens } from "../lib/theme";
 
 export const recommendedSongs = [

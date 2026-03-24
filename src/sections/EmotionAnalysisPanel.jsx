@@ -196,7 +196,8 @@ function EmotionAnalysisPanel() {
         </div>
       </div>
 
-      <div className="mt-4 grid min-h-0 flex-1 gap-4 xl:grid-cols-[1.08fr_0.92fr]">
+      <div className="mt-4 grid min-h-0 flex-1 gap-4 lg:grid-cols-[1.08fr_0.92fr]">
+        {/* 1. 감정 분석 결과 */}
         <div className="rounded-[24px] bg-slate-50 p-5">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -230,6 +231,7 @@ function EmotionAnalysisPanel() {
           </div>
         </div>
 
+        {/* 2. 다른 날의 감정 보기 */}
         <div className="rounded-[24px] border border-dashed border-brand-200 bg-brand-50/60 p-4">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -255,11 +257,10 @@ function EmotionAnalysisPanel() {
                       setSelectedYear(year);
                       moveStep("month");
                     }}
-                    className={`rounded-2xl px-3 py-2 text-sm font-semibold transition ${
-                      isActive
+                    className={`rounded-2xl px-3 py-2 text-sm font-semibold transition ${isActive
                         ? "bg-brand-700 text-white"
                         : "bg-slate-100 text-slate-600 hover:bg-brand-50 hover:text-brand-700"
-                    }`}
+                      }`}
                   >
                     {year}
                   </button>
@@ -289,13 +290,12 @@ function EmotionAnalysisPanel() {
                           setSelectedMonth(month.value);
                           moveStep("day");
                         }}
-                        className={`rounded-2xl px-3 py-4 text-sm font-semibold transition ${
-                          isActive
+                        className={`rounded-2xl px-3 py-4 text-sm font-semibold transition ${isActive
                             ? "bg-brand-700 text-white"
                             : hasData
                               ? "bg-slate-50 text-slate-700 hover:bg-brand-50 hover:text-brand-700"
                               : "cursor-not-allowed bg-slate-50/70 text-slate-300"
-                        }`}
+                          }`}
                       >
                         {month.label}
                       </button>
@@ -338,13 +338,12 @@ function EmotionAnalysisPanel() {
                           type="button"
                           disabled={!hasData}
                           onClick={() => setSelectedDate(dateKey)}
-                          className={`h-8 rounded-lg text-[11px] font-semibold transition ${
-                            isSelected
+                          className={`h-8 rounded-lg text-[11px] font-semibold transition ${isSelected
                               ? "bg-brand-700 text-white"
                               : hasData
                                 ? "bg-slate-50 text-slate-700 hover:bg-brand-50 hover:text-brand-700"
                                 : "cursor-not-allowed bg-slate-50/70 text-slate-300"
-                          }`}
+                            }`}
                         >
                           {day}
                         </button>
@@ -357,6 +356,22 @@ function EmotionAnalysisPanel() {
           </div>
         </div>
 
+        {/* 3. 핵심 해석 */}
+        <div className="rounded-[24px] border border-dashed border-brand-200 bg-brand-50/60 p-5">
+          <div className="text-sm font-semibold text-brand-700">핵심 해석</div>
+          <div className="mt-3 grid gap-2">
+            {currentAnalysis.insights.map((item) => (
+              <div
+                key={item}
+                className="rounded-2xl bg-white/85 px-4 py-3 text-sm leading-6 text-slate-600"
+              >
+                {item}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 4. 자주 쓰는 표현 */}
         <div className="rounded-[24px] border border-dashed border-brand-200 bg-brand-50/60 p-5">
           <div className="text-sm font-semibold text-brand-700">자주 쓰는 표현</div>
           <p className="mt-1 text-xs text-slate-500">
@@ -380,22 +395,8 @@ function EmotionAnalysisPanel() {
             ))}
           </div>
         </div>
-
-        <div className="rounded-[24px] border border-dashed border-brand-200 bg-brand-50/60 p-5">
-          <div className="text-sm font-semibold text-brand-700">핵심 해석</div>
-          <div className="mt-3 grid gap-2">
-            {currentAnalysis.insights.map((item) => (
-              <div
-                key={item}
-                className="rounded-2xl bg-white/85 px-4 py-3 text-sm leading-6 text-slate-600"
-              >
-                {item}
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
-    </section>
+    </section >
   );
 }
 

@@ -16,7 +16,6 @@ function CounselingPage() {
         chatError={chatError}
         onSendMessage={onSendMessage}
       />
-      <CompanionPanel currentUser={currentUser} theme={theme} />
     </div>
   );
 }

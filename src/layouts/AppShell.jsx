@@ -4,8 +4,10 @@ import { useCurrentUser } from "../lib/useCurrentUser";
 import { getThemeTokens } from "../lib/theme";
 import { loadChatsForUser, removeChat, sendChatMessage } from "../services/chatService";
 import { resetToLoginState } from "../services/profileService";
-import { recommendedSongs } from "../sections/CompanionPanel";
 import ChatHistoryPanel from "../sections/ChatHistoryPanel";
+import MiniPlayer from "../components/music/MiniPlayer";
+import MusicCard from "../components/music/MusicCard";
+import { getPrimarySong, getRecommendedSongs } from "../utils/musicHelpers";
 
 const menuItems = [
   { to: "/counseling", label: "상담", icon: "C" },
@@ -34,11 +36,12 @@ function AppShell() {
   const [selectedChatId, setSelectedChatId] = useState(null);
   const [chatStatus, setChatStatus] = useState("idle");
   const [chatError, setChatError] = useState("");
-  const [selectedAnalysisSong, setSelectedAnalysisSong] = useState(recommendedSongs[0].title);
-  const isCounselingPage = location.pathname === "/counseling";
+  const isCounselingPage = location.pathname.includes("counseling");
   const isGuest = currentUser?.source === "guest";
   const isLoggedIn = Boolean(currentUser?.id) && !isGuest;
   const selectedChat = chatSessions.find((chat) => chat.id === selectedChatId) || null;
+  const analysisEmotion = "calm";
+  const selectedAnalysisSong = getPrimarySong(analysisEmotion);
 
   useEffect(() => {
     let isActive = true;
@@ -135,7 +138,7 @@ function AppShell() {
 
   return (
     <div
-      className="min-h-screen p-4 md:p-6"
+      className="min-h-screen p-3 sm:p-4 md:p-6"
       style={{
         "--theme-strong": theme.strong,
         "--theme-soft": theme.soft,
@@ -145,12 +148,13 @@ function AppShell() {
         "--theme-tint-text": theme.tintText,
       }}
     >
-      <div className="mx-auto flex min-h-[calc(100vh-2rem)] max-w-[1600px] gap-4 md:gap-6">
-        <div className="panel fixed inset-x-4 top-4 z-20 flex items-center justify-between px-4 py-3 md:hidden">
+      <div className="mx-auto flex max-w-[1600px] flex-col gap-4 md:gap-6 lg:flex-row">
+        <div className="panel fixed inset-x-3 top-3 z-20 flex items-center justify-between px-4 py-3 sm:inset-x-4 sm:top-4 md:hidden">
           <div>
             <div className="text-sm font-bold text-[color:var(--theme-strong)]">MindBridge</div>
             <div className="text-xs text-slate-500">AI Emotion Care</div>
           </div>
+
           <div className="flex items-center gap-2">
             <nav className="flex items-center gap-2">
               {[...menuItems, { to: "/settings", label: "설정" }].map((item) => (
@@ -158,8 +162,7 @@ function AppShell() {
                   key={item.to}
                   to={item.to}
                   className={({ isActive }) =>
-                    `rounded-full px-4 py-2 text-sm font-semibold transition ${
-                      isActive ? "text-white" : "text-[color:var(--theme-strong)] hover:opacity-90"
+                    `rounded-full px-4 py-2 text-sm font-semibold transition ${isActive ? "text-white" : "text-[color:var(--theme-strong)] hover:opacity-90"
                     }`
                   }
                   style={({ isActive }) => ({
@@ -170,6 +173,7 @@ function AppShell() {
                 </NavLink>
               ))}
             </nav>
+
             <button
               type="button"
               onClick={handleAuthAction}
@@ -180,19 +184,19 @@ function AppShell() {
           </div>
         </div>
 
-        <aside className="panel hidden h-[calc(100vh-3rem)] w-[250px] shrink-0 flex-col overflow-hidden px-4 py-5 md:flex">
-          <div className="flex items-center gap-3 px-1">
-            <div
-              className="flex h-10 w-10 items-center justify-center rounded-2xl text-sm font-bold text-white"
-              style={{ backgroundColor: theme.strong, boxShadow: `0 12px 22px ${theme.glow}` }}
-            >
-              M
-            </div>
-            <div className="min-w-0">
-              <div className="text-sm font-bold text-[color:var(--theme-strong)]">MindBridge</div>
-              <div className="text-xs text-slate-500">AI Emotion Care</div>
-            </div>
+        <aside className="panel hidden lg:flex lg:min-h-[calc(100vh-3rem)] lg:w-[280px] lg:shrink-0 lg:flex-col lg:overflow-hidden lg:px-4 lg:py-5">          <div className="flex items-center gap-3 px-1">
+          <div
+            className="flex h-10 w-10 items-center justify-center rounded-2xl text-sm font-bold text-white"
+            style={{ backgroundColor: theme.strong, boxShadow: `0 12px 22px ${theme.glow}` }}
+          >
+            M
           </div>
+
+          <div className="min-w-0">
+            <div className="text-sm font-bold text-[color:var(--theme-strong)]">MindBridge</div>
+            <div className="text-xs text-slate-500">AI Emotion Care</div>
+          </div>
+        </div>
 
           <nav className="mt-5 flex shrink-0 flex-col gap-2">
             {menuItems.map((item) => (
@@ -200,10 +204,9 @@ function AppShell() {
                 key={item.to}
                 to={item.to}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
-                    isActive
-                      ? "text-white"
-                      : "bg-slate-50 text-slate-700 hover:text-[color:var(--theme-strong)]"
+                  `flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${isActive
+                    ? "text-white"
+                    : "bg-slate-50 text-slate-700 hover:text-[color:var(--theme-strong)]"
                   }`
                 }
                 style={({ isActive }) => ({
@@ -228,7 +231,7 @@ function AppShell() {
                 theme={theme}
               />
             ) : (
-              <div className="flex min-h-0 flex-1 flex-col gap-3">
+              <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1">
                 {analysisSummaries.map((summary) => (
                   <div
                     key={summary.label}
@@ -243,88 +246,111 @@ function AppShell() {
                   </div>
                 ))}
 
-                <div className="rounded-3xl bg-slate-50 px-4 py-4">
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--theme-strong)]">
-                    Music
-                  </div>
-                  <div className="mt-2 text-sm font-bold text-ink">추천 음악</div>
-                  <div className="mt-3 space-y-2">
-                    {recommendedSongs.map((song) => {
-                      const isSelected = song.title === selectedAnalysisSong;
-
-                      return (
-                        <div
-                          key={song.title}
-                          className={`flex items-center justify-between rounded-2xl px-3 py-2 text-xs transition ${
-                            isSelected ? "" : "bg-white text-slate-700"
-                          }`}
-                          style={
-                            isSelected
-                              ? { backgroundColor: theme.soft, color: theme.strong }
-                              : undefined
-                          }
-                        >
-                          <span className="truncate pr-2">{song.title}</span>
-                          <button
-                            type="button"
-                            onClick={() => setSelectedAnalysisSong(song.title)}
-                            className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${
-                              isSelected ? "text-white" : "bg-ink text-white hover:bg-slate-700"
-                            }`}
-                            style={isSelected ? { backgroundColor: theme.strong } : undefined}
-                          >
-                            재생
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
+                <MiniPlayer
+                  theme={theme}
+                  song={selectedAnalysisSong}
+                  emotion={analysisEmotion}
+                />
               </div>
             )}
-          </div>
 
-          <div className="mt-4 shrink-0 border-t border-slate-100 pt-4">
-            <button
-              type="button"
-              onClick={handleAuthAction}
-              className="flex w-full items-center justify-between rounded-2xl bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:text-[color:var(--theme-strong)]"
-            >
-              <span>{authLabel}</span>
-              <span className="text-xs">{accountBadge}</span>
-            </button>
+            <div className="mt-4 shrink-0 border-t border-slate-100 pt-4">
+              <button
+                type="button"
+                onClick={handleAuthAction}
+                className="flex w-full items-center justify-between rounded-2xl bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:text-[color:var(--theme-strong)]"
+              >
+                <span>{authLabel}</span>
+                <span className="text-xs">{accountBadge}</span>
+              </button>
 
-            <NavLink
-              to="/settings"
-              className={({ isActive }) =>
-                `mt-2 flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold transition ${
-                  isActive
+              <NavLink
+                to="/settings"
+                className={({ isActive }) =>
+                  `mt-2 flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold transition ${isActive
                     ? "text-white"
                     : "bg-slate-50 text-slate-700 hover:text-[color:var(--theme-strong)]"
-                }`
-              }
-              style={({ isActive }) => ({
-                backgroundColor: isActive ? "var(--theme-strong)" : undefined,
-              })}
-            >
-              <span>설정</span>
-              <span className="text-xs">{currentUser?.assistantName || "마음이"}</span>
-            </NavLink>
+                  }`
+                }
+                style={({ isActive }) => ({
+                  backgroundColor: isActive ? "var(--theme-strong)" : undefined,
+                })}
+              >
+                <span>설정</span>
+                <span className="text-xs">{currentUser?.assistantName || "마음이"}</span>
+              </NavLink>
+            </div>
           </div>
         </aside>
 
-        <main className="relative min-w-0 flex-1 overflow-hidden pt-20 md:h-[calc(100vh-3rem)] md:pt-0">
-          <Outlet
-            context={{
-              selectedChat,
-              currentUser,
-              theme,
-              chatStatus,
-              chatError,
-              onSendMessage: handleSendMessage,
-            }}
-          />
-        </main>
+        <div
+          className={`grid flex-1 grid-cols-1 gap-4 md:gap-6 ${isCounselingPage ? "lg:grid-cols-[minmax(0,1fr)_320px]" : ""
+            }`}
+        >          {/* 채팅 메인 */}
+          <main className="min-w-0">
+            <Outlet
+              context={{
+                selectedChat,
+                currentUser,
+                theme,
+                chatStatus,
+                chatError,
+                onSendMessage: handleSendMessage,
+              }}
+            />
+          </main>
+
+          {/* 오른쪽 보조 패널 */}
+          {isCounselingPage && (
+            <aside className="flex min-w-0 flex-col gap-4">
+              <div
+                className="rounded-[2rem] border p-6"
+                style={{
+                  background: "#ffffff",
+                  borderColor: "#edf2f7",
+                  boxShadow: "0 12px 32px rgba(15, 23, 42, 0.05)",
+                }}
+              >
+                <p
+                  className="text-xs font-semibold uppercase tracking-[0.28em]"
+                  style={{ color: theme?.strong || "#4fa36c" }}
+                >
+                  AVATAR
+                </p>
+
+                <h3
+                  className="mt-3 text-[2rem] font-extrabold leading-none"
+                  style={{ color: "#1f2a3d" }}
+                >
+                  마음이
+                </h3>
+
+                <p
+                  className="mt-4 text-[15px] leading-7"
+                  style={{ color: "#6b7b95" }}
+                >
+                  업로드한 아바타 이미지가 그대로 표시됩니다.
+                </p>
+
+                <div
+                  className="mt-5 flex justify-center rounded-[1.8rem] p-5"
+                  style={{ background: theme?.avatar?.surface || theme?.soft || "#f2faf4" }}
+                >
+                  <img
+                    src={theme?.avatar?.image}
+                    alt="avatar"
+                    className="h-64 w-full max-w-[260px] object-contain"
+                  />
+                </div>
+              </div>
+              <MusicCard
+                theme={theme}
+                emotion={analysisEmotion}
+                songs={getRecommendedSongs(analysisEmotion,3)}
+              />
+            </aside>
+          )}
+        </div>
       </div>
     </div>
   );
