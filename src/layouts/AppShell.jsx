@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useAppPreferences } from "../lib/useAppPreferences";
 import { useCurrentUser } from "../lib/useCurrentUser";
 import { getThemeTokens } from "../lib/theme";
 import { loadChatsForUser, removeChat, sendChatMessage } from "../services/chatService";
@@ -18,12 +19,12 @@ const analysisSummaries = [
   {
     label: "오늘",
     value: "64%",
-    note: "현재는 예시 데이터입니다. 실제 감정 분석 데이터로 교체할 수 있습니다.",
+    note: "현재 값은 예시 데이터입니다. 실제 감정 분석 데이터로 교체할 수 있습니다.",
   },
   {
     label: "어제",
     value: "58%",
-    note: "이 영역은 아직 UI 샘플 상태이며, 이후 서비스 데이터와 연결하면 됩니다.",
+    note: "이 영역은 임시 UI 상태이며, 이후 서비스 데이터와 연결할 수 있습니다.",
   },
 ];
 
@@ -31,6 +32,7 @@ function AppShell() {
   const navigate = useNavigate();
   const location = useLocation();
   const currentUser = useCurrentUser();
+  const { volume, isMuted } = useAppPreferences();
   const theme = getThemeTokens(currentUser);
   const [chatSessions, setChatSessions] = useState([]);
   const [selectedChatId, setSelectedChatId] = useState(null);
@@ -42,6 +44,7 @@ function AppShell() {
   const selectedChat = chatSessions.find((chat) => chat.id === selectedChatId) || null;
   const analysisEmotion = "calm";
   const selectedAnalysisSong = getPrimarySong(analysisEmotion);
+  const assistantName = currentUser?.assistantName || "마음이";
 
   useEffect(() => {
     let isActive = true;
@@ -84,6 +87,27 @@ function AppShell() {
       isActive = false;
     };
   }, [currentUser]);
+
+  useEffect(() => {
+    const normalizedVolume = isMuted ? 0 : Math.max(0, Math.min(100, Number(volume))) / 100;
+
+    const applyVolume = (mediaElement) => {
+      if (mediaElement instanceof HTMLMediaElement) {
+        mediaElement.volume = normalizedVolume;
+      }
+    };
+
+    const handlePlay = (event) => {
+      applyVolume(event.target);
+    };
+
+    document.querySelectorAll("audio, video").forEach(applyVolume);
+    document.addEventListener("play", handlePlay, true);
+
+    return () => {
+      document.removeEventListener("play", handlePlay, true);
+    };
+  }, [isMuted, volume]);
 
   const handleAuthAction = () => {
     resetToLoginState();
@@ -138,7 +162,7 @@ function AppShell() {
 
   return (
     <div
-      className="min-h-screen p-3 sm:p-4 md:p-6"
+      className="min-h-screen p-3 sm:p-4 md:p-6 lg:h-screen"
       style={{
         "--theme-strong": theme.strong,
         "--theme-soft": theme.soft,
@@ -148,7 +172,7 @@ function AppShell() {
         "--theme-tint-text": theme.tintText,
       }}
     >
-      <div className="mx-auto flex max-w-[1600px] flex-col gap-4 md:gap-6 lg:flex-row">
+      <div className="mx-auto flex max-w-[1600px] flex-col gap-4 md:gap-6 lg:h-full lg:min-h-0 lg:flex-row">
         <div className="panel fixed inset-x-3 top-3 z-20 flex items-center justify-between px-4 py-3 sm:inset-x-4 sm:top-4 md:hidden">
           <div>
             <div className="text-sm font-bold text-[color:var(--theme-strong)]">MindBridge</div>
@@ -162,7 +186,8 @@ function AppShell() {
                   key={item.to}
                   to={item.to}
                   className={({ isActive }) =>
-                    `rounded-full px-4 py-2 text-sm font-semibold transition ${isActive ? "text-white" : "text-[color:var(--theme-strong)] hover:opacity-90"
+                    `rounded-full px-4 py-2 text-sm font-semibold transition ${
+                      isActive ? "text-white" : "text-[color:var(--theme-strong)] hover:opacity-90"
                     }`
                   }
                   style={({ isActive }) => ({
@@ -184,19 +209,20 @@ function AppShell() {
           </div>
         </div>
 
-        <aside className="panel hidden lg:flex lg:min-h-[calc(100vh-3rem)] lg:w-[280px] lg:shrink-0 lg:flex-col lg:overflow-hidden lg:px-4 lg:py-5">          <div className="flex items-center gap-3 px-1">
-          <div
-            className="flex h-10 w-10 items-center justify-center rounded-2xl text-sm font-bold text-white"
-            style={{ backgroundColor: theme.strong, boxShadow: `0 12px 22px ${theme.glow}` }}
-          >
-            M
-          </div>
+        <aside className="panel hidden lg:flex lg:min-h-[calc(100vh-3rem)] lg:w-[280px] lg:shrink-0 lg:flex-col lg:overflow-hidden lg:px-4 lg:py-5">
+          <div className="flex items-center gap-3 px-1">
+            <div
+              className="flex h-10 w-10 items-center justify-center rounded-2xl text-sm font-bold text-white"
+              style={{ backgroundColor: theme.strong, boxShadow: `0 12px 22px ${theme.glow}` }}
+            >
+              M
+            </div>
 
-          <div className="min-w-0">
-            <div className="text-sm font-bold text-[color:var(--theme-strong)]">MindBridge</div>
-            <div className="text-xs text-slate-500">AI Emotion Care</div>
+            <div className="min-w-0">
+              <div className="text-sm font-bold text-[color:var(--theme-strong)]">MindBridge</div>
+              <div className="text-xs text-slate-500">AI Emotion Care</div>
+            </div>
           </div>
-        </div>
 
           <nav className="mt-5 flex shrink-0 flex-col gap-2">
             {menuItems.map((item) => (
@@ -204,9 +230,10 @@ function AppShell() {
                 key={item.to}
                 to={item.to}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${isActive
-                    ? "text-white"
-                    : "bg-slate-50 text-slate-700 hover:text-[color:var(--theme-strong)]"
+                  `flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
+                    isActive
+                      ? "text-white"
+                      : "bg-slate-50 text-slate-700 hover:text-[color:var(--theme-strong)]"
                   }`
                 }
                 style={({ isActive }) => ({
@@ -238,19 +265,13 @@ function AppShell() {
                     className="rounded-3xl px-4 py-4 text-sm"
                     style={{ backgroundColor: theme.soft, color: theme.tintText }}
                   >
-                    <div className="text-xs font-semibold uppercase tracking-[0.2em]">
-                      {summary.label}
-                    </div>
+                    <div className="text-xs font-semibold uppercase tracking-[0.2em]">{summary.label}</div>
                     <div className="mt-2 text-lg font-bold">{summary.value}</div>
                     <p className="mt-2 text-xs leading-5">{summary.note}</p>
                   </div>
                 ))}
 
-                <MiniPlayer
-                  theme={theme}
-                  song={selectedAnalysisSong}
-                  emotion={analysisEmotion}
-                />
+                <MiniPlayer theme={theme} song={selectedAnalysisSong} emotion={analysisEmotion} />
               </div>
             )}
 
@@ -267,9 +288,10 @@ function AppShell() {
               <NavLink
                 to="/settings"
                 className={({ isActive }) =>
-                  `mt-2 flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold transition ${isActive
-                    ? "text-white"
-                    : "bg-slate-50 text-slate-700 hover:text-[color:var(--theme-strong)]"
+                  `mt-2 flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold transition ${
+                    isActive
+                      ? "text-white"
+                      : "bg-slate-50 text-slate-700 hover:text-[color:var(--theme-strong)]"
                   }`
                 }
                 style={({ isActive }) => ({
@@ -277,17 +299,18 @@ function AppShell() {
                 })}
               >
                 <span>설정</span>
-                <span className="text-xs">{currentUser?.assistantName || "마음이"}</span>
+                <span className="text-xs">{assistantName}</span>
               </NavLink>
             </div>
           </div>
         </aside>
 
         <div
-          className={`grid flex-1 grid-cols-1 gap-4 md:gap-6 ${isCounselingPage ? "lg:grid-cols-[minmax(0,1fr)_320px]" : ""
-            }`}
-        >          {/* 채팅 메인 */}
-          <main className="min-w-0">
+          className={`grid flex-1 grid-cols-1 gap-4 md:gap-6 lg:min-h-0 ${
+            isCounselingPage ? "lg:grid-cols-[minmax(0,1fr)_320px]" : ""
+          }`}
+        >
+          <main className="min-w-0 lg:min-h-0">
             <Outlet
               context={{
                 selectedChat,
@@ -300,9 +323,8 @@ function AppShell() {
             />
           </main>
 
-          {/* 오른쪽 보조 패널 */}
           {isCounselingPage && (
-            <aside className="flex min-w-0 flex-col gap-4">
+            <aside className="flex min-w-0 flex-col gap-4 lg:min-h-0">
               <div
                 className="rounded-[2rem] border p-6"
                 style={{
@@ -322,13 +344,10 @@ function AppShell() {
                   className="mt-3 text-[2rem] font-extrabold leading-none"
                   style={{ color: "#1f2a3d" }}
                 >
-                  마음이
+                  {assistantName}
                 </h3>
 
-                <p
-                  className="mt-4 text-[15px] leading-7"
-                  style={{ color: "#6b7b95" }}
-                >
+                <p className="mt-4 text-[15px] leading-7" style={{ color: "#6b7b95" }}>
                   업로드한 아바타 이미지가 그대로 표시됩니다.
                 </p>
 
@@ -343,10 +362,11 @@ function AppShell() {
                   />
                 </div>
               </div>
+
               <MusicCard
                 theme={theme}
                 emotion={analysisEmotion}
-                songs={getRecommendedSongs(analysisEmotion,3)}
+                songs={getRecommendedSongs(analysisEmotion, 3)}
               />
             </aside>
           )}

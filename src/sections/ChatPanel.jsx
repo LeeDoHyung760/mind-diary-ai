@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import SlimeAvatar from "../components/SlimeAvatar";
 import { getThemeTokens } from "../lib/theme";
 import { formatChatTime } from "../utils/chatFormat";
@@ -14,8 +14,19 @@ function ChatPanel({
   const [draft, setDraft] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const messageListRef = useRef(null);
   const messages = selectedChat?.messages ?? [];
   const assistantName = currentUser?.assistantName || "마음이";
+
+  useEffect(() => {
+    const container = messageListRef.current;
+
+    if (!container) {
+      return;
+    }
+
+    container.scrollTop = container.scrollHeight;
+  }, [messages.length, chatStatus]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -38,6 +49,20 @@ function ChatPanel({
     }
   };
 
+  const handleKeyDown = (event) => {
+    if (event.key !== "Enter" || event.shiftKey) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (!draft.trim() || isSubmitting || chatStatus === "loading") {
+      return;
+    }
+
+    handleSubmit(event);
+  };
+
   return (
     <section className="panel flex h-full min-h-0 flex-col overflow-hidden">
       <div className="shrink-0 border-b border-slate-100 px-5 py-5 md:px-8">
@@ -46,9 +71,9 @@ function ChatPanel({
         </p>
         <div className="mt-2 flex items-center justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-ink">{selectedChat?.title || "새 대화"}</h2>
+            <h2 className="text-2xl font-bold text-ink">{selectedChat?.title || "새 상담"}</h2>
             <p className="mt-2 text-sm text-slate-500">
-              메시지는 채팅 서비스 계층을 통해 저장됩니다. AI 응답은 아직 임시 문구입니다.
+              메시지는 채팅 서비스와 연동되어 저장됩니다. AI 답변은 현재 임시 문구입니다.
             </p>
           </div>
           <div className="hidden rounded-2xl bg-slate-50 px-4 py-3 text-sm font-medium text-slate-500 md:block">
@@ -57,8 +82,8 @@ function ChatPanel({
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto bg-[#fcfbf8]">
-        <div className="soft-scrollbar h-full space-y-6 px-5 py-6 md:px-8">
+      <div ref={messageListRef} className="soft-scrollbar min-h-0 flex-1 overflow-y-auto bg-[#fcfbf8]">
+        <div className="h-full space-y-6 px-5 py-6 md:px-8">
           {chatStatus === "loading" && (
             <div className="rounded-2xl bg-white px-4 py-4 text-sm text-slate-500 shadow-sm">
               대화 기록을 불러오는 중입니다.
@@ -66,14 +91,12 @@ function ChatPanel({
           )}
 
           {chatStatus === "error" && (
-            <div className="rounded-2xl bg-rose-50 px-4 py-4 text-sm text-rose-600">
-              {chatError}
-            </div>
+            <div className="rounded-2xl bg-rose-50 px-4 py-4 text-sm text-rose-600">{chatError}</div>
           )}
 
           {chatStatus === "ready" && messages.length === 0 && (
             <div className="rounded-2xl bg-white px-4 py-4 text-sm text-slate-500 shadow-sm">
-              첫 메시지를 보내면 새 대화가 시작됩니다.
+              첫 메시지를 보내면 대화가 시작됩니다.
             </div>
           )}
 
@@ -94,6 +117,7 @@ function ChatPanel({
                     <SlimeAvatar avatar={theme.avatar} size="small" />
                   </div>
                 )}
+
                 <div
                   className={`max-w-[90%] rounded-[28px] px-5 py-4 text-sm leading-7 shadow-sm md:max-w-[75%] ${
                     isAi
@@ -102,7 +126,7 @@ function ChatPanel({
                   }`}
                   style={!isAi ? { backgroundColor: theme.strong } : undefined}
                 >
-                  <p>{message.text}</p>
+                  <p className="whitespace-pre-wrap break-words">{message.text}</p>
                   <div
                     className={`mt-2 text-right text-xs ${isAi ? "text-slate-400" : ""}`}
                     style={!isAi ? { color: theme.contrast } : undefined}
@@ -110,6 +134,7 @@ function ChatPanel({
                     {formatChatTime(message.createdAt)}
                   </div>
                 </div>
+
                 {!isAi && (
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-200 text-sm font-bold text-slate-600">
                     나
@@ -127,15 +152,16 @@ function ChatPanel({
             rows="3"
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
-            placeholder="지금의 감정이나 상황을 적어보세요."
+            onKeyDown={handleKeyDown}
+            placeholder="지금의 감정이나 상황을 적어보세요"
             className="min-h-[120px] flex-1 resize-none rounded-[28px] border border-slate-200 bg-slate-50 px-5 py-4 text-sm outline-none transition focus:bg-white focus:ring-4"
             style={{ ["--tw-ring-color"]: theme.ring }}
           />
+
           {submitError && (
-            <div className="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-600">
-              {submitError}
-            </div>
+            <div className="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-600">{submitError}</div>
           )}
+
           <div className="flex justify-end">
             <button
               type="submit"
