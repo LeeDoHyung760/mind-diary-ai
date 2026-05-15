@@ -33,7 +33,13 @@ bin/
 
 ### Env ###
 .env
+.env.*
+!.env.example
+!.env.sample
 backend/.env
+backend/.env.*
+!backend/.env.example
+!backend/.env.sample
 
 ### Node ###
 node_modules/

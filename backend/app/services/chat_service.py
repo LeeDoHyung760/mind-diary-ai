@@ -9,14 +9,21 @@ from ..repositories.chat_repository import (
 from ..utils import serialize_datetime, utc_now
 from .errors import ApiError
 
+FALLBACK_AI_TEXT = "지금은 AI 모델이 연결되어 있지 않지만, 입력한 내용은 저장되었습니다."
+
 
 def _serialize_message(message):
-    return {
+    serialized = {
         "id": message.get("id"),
         "sender": message.get("sender"),
         "text": message.get("text"),
         "createdAt": serialize_datetime(message.get("createdAt")),
     }
+
+    if "emotion" in message:
+        serialized["emotion"] = message.get("emotion")
+
+    return serialized
 
 
 def _build_chat_title(text):
@@ -77,7 +84,8 @@ def append_chat_message(user_id, payload):
     ai_message = {
         "id": str(ObjectId()),
         "sender": "ai",
-        "text": "...",
+        "text": FALLBACK_AI_TEXT,
+        "emotion": {},
         "createdAt": now,
     }
 
