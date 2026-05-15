@@ -48,14 +48,13 @@ export function appendGuestChatMessage(text, chatId) {
   const chats = readGuestChats();
   const now = new Date().toISOString();
   const userMessage = buildMessage("user", text);
-  const aiMessage = buildMessage("ai", "...");
 
   if (chatId) {
     const updatedChats = chats.map((chat) =>
       chat.id === chatId
         ? normalizeChatTitle({
             ...chat,
-            messages: [...(chat.messages || []), userMessage, aiMessage],
+            messages: [...(chat.messages || []), userMessage],
             updatedAt: now,
           })
         : chat
@@ -68,7 +67,7 @@ export function appendGuestChatMessage(text, chatId) {
   const newChat = normalizeChatTitle({
     id: crypto.randomUUID(),
     title: buildChatTitle(text),
-    messages: [userMessage, aiMessage],
+    messages: [userMessage],
     createdAt: now,
     updatedAt: now,
   });
