@@ -41,13 +41,17 @@ dist/
 
 ### Python ###
 backend/.venv/
-backend/__pycache__/
-backend/app/__pycache__/
-backend/app/routes/__pycache__/
+__pycache__/
 *.pyc
 *.pyo
 *.pyd
 .pytest_cache/
+
+### Model weights ###
+*.safetensors
+*.bin
+*.pt
+*.onnx
 
 ### Logs ###
 *.log

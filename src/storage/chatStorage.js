@@ -20,11 +20,12 @@ function buildChatTitle(text) {
   return compact.slice(0, 24) || "새 대화";
 }
 
-function buildMessage(sender, text) {
+function buildMessage(sender, text, emotion = null) {
   return {
     id: crypto.randomUUID(),
     sender,
     text,
+    ...(emotion && { emotion }),
     createdAt: new Date().toISOString(),
   };
 }
@@ -44,11 +45,11 @@ export function getStoredGuestChats() {
     .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
 }
 
-export function appendGuestChatMessage(text, chatId) {
+export function appendGuestChatMessage(text, chatId, aiText = "...", emotion = null) {
   const chats = readGuestChats();
   const now = new Date().toISOString();
-  const userMessage = buildMessage("user", text);
-  const aiMessage = buildMessage("ai", "...");
+  const userMessage = buildMessage("user", text, emotion);
+  const aiMessage = buildMessage("ai", aiText);
 
   if (chatId) {
     const updatedChats = chats.map((chat) =>

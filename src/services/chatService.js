@@ -2,6 +2,7 @@ import {
   appendUserChatMessage,
   deleteUserChat,
   getUserChats,
+  guestChat,
 } from "../lib/api";
 import {
   appendGuestChatMessage,
@@ -28,7 +29,17 @@ export async function sendChatMessage(user, chatId, text) {
     return response.chat;
   }
 
-  return appendGuestChatMessage(text, chatId);
+  let aiText = "...";
+  let emotion = null;
+  try {
+    const response = await guestChat(text);
+    aiText = response.reply || "...";
+    emotion = response.emotion || null;
+  } catch {
+    // 백엔드 연결 실패 시 기본값 유지
+  }
+
+  return appendGuestChatMessage(text, chatId, aiText, emotion);
 }
 
 export async function removeChat(user, chatId) {

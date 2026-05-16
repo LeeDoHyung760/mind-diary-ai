@@ -52,4 +52,11 @@ export function deleteUserChat(userId, chatId) {
   });
 }
 
+export function guestChat(text) {
+  return request("/guest/chat", {
+    method: "POST",
+    body: JSON.stringify({ text }),
+  });
+}
+
 export { API_BASE_URL };

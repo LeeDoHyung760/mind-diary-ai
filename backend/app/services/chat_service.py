@@ -1,4 +1,9 @@
+import logging
+
 from bson import ObjectId
+
+from models.emotion_kcelectra import emotion_model
+from models.chat import chat_model
 
 from ..repositories.chat_repository import (
     delete_chat as delete_chat_record,
@@ -8,6 +13,8 @@ from ..repositories.chat_repository import (
 )
 from ..utils import serialize_datetime, utc_now
 from .errors import ApiError
+
+logger = logging.getLogger(__name__)
 
 
 def _serialize_message(message):
@@ -74,10 +81,17 @@ def append_chat_message(user_id, payload):
         "text": message_text,
         "createdAt": now,
     }
+    try:
+        emotion_result = emotion_model.classify(message_text)
+        ai_text = chat_model.generate(message_text, emotion_result["label"])
+    except Exception:
+        logger.exception("AI 응답 생성 실패")
+        ai_text = "죄송합니다. 일시적인 오류가 발생했습니다. 다시 말씀해 주세요."
+
     ai_message = {
         "id": str(ObjectId()),
         "sender": "ai",
-        "text": "...",
+        "text": ai_text,
         "createdAt": now,
     }
 
