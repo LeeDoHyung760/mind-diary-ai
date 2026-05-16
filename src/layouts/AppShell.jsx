@@ -6,9 +6,9 @@ import { getThemeTokens } from "../lib/theme";
 import { loadChatsForUser, removeChat, sendChatMessage } from "../services/chatService";
 import { resetToLoginState } from "../services/profileService";
 import ChatHistoryPanel from "../sections/ChatHistoryPanel";
-import MiniPlayer from "../components/music/MiniPlayer";
+import SlimeAvatar from "../components/SlimeAvatar";
 import MusicCard from "../components/music/MusicCard";
-import { getPrimarySong, getRecommendedSongs } from "../utils/musicHelpers";
+import { getRecommendedSongs } from "../utils/musicHelpers";
 
 const menuItems = [
   { to: "/counseling", label: "상담", icon: "C" },
@@ -43,7 +43,6 @@ function AppShell() {
   const isLoggedIn = Boolean(currentUser?.id) && !isGuest;
   const selectedChat = chatSessions.find((chat) => chat.id === selectedChatId) || null;
   const analysisEmotion = "calm";
-  const selectedAnalysisSong = getPrimarySong(analysisEmotion);
   const assistantName = currentUser?.assistantName || "마음이";
 
   useEffect(() => {
@@ -162,7 +161,7 @@ function AppShell() {
 
   return (
     <div
-      className="min-h-screen p-3 sm:p-4 md:p-6 lg:h-screen"
+      className="h-screen overflow-hidden p-3 sm:p-4 md:p-6"
       style={{
         "--theme-strong": theme.strong,
         "--theme-soft": theme.soft,
@@ -172,7 +171,7 @@ function AppShell() {
         "--theme-tint-text": theme.tintText,
       }}
     >
-      <div className="mx-auto flex max-w-[1600px] flex-col gap-4 md:gap-6 lg:h-full lg:min-h-0 lg:flex-row">
+      <div className="mx-auto flex h-full min-h-0 max-w-[1600px] flex-col gap-4 overflow-hidden lg:flex-row">
         <div className="panel fixed inset-x-3 top-3 z-20 flex items-center justify-between px-4 py-3 sm:inset-x-4 sm:top-4 md:hidden">
           <div>
             <div className="text-sm font-bold text-[color:var(--theme-strong)]">MindBridge</div>
@@ -209,7 +208,7 @@ function AppShell() {
           </div>
         </div>
 
-        <aside className="panel hidden lg:flex lg:min-h-[calc(100vh-3rem)] lg:w-[280px] lg:shrink-0 lg:flex-col lg:overflow-hidden lg:px-4 lg:py-5">
+        <aside className="panel hidden lg:flex lg:h-full lg:min-h-0 lg:w-[280px] lg:shrink-0 lg:flex-col lg:overflow-hidden lg:px-4 lg:py-5">
           <div className="flex items-center gap-3 px-1">
             <div
               className="flex h-10 w-10 items-center justify-center rounded-2xl text-sm font-bold text-white"
@@ -258,7 +257,7 @@ function AppShell() {
                 theme={theme}
               />
             ) : (
-              <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1">
+              <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden pr-1">
                 {analysisSummaries.map((summary) => (
                   <div
                     key={summary.label}
@@ -271,7 +270,6 @@ function AppShell() {
                   </div>
                 ))}
 
-                <MiniPlayer theme={theme} song={selectedAnalysisSong} emotion={analysisEmotion} />
               </div>
             )}
 
@@ -306,11 +304,9 @@ function AppShell() {
         </aside>
 
         <div
-          className={`grid flex-1 grid-cols-1 gap-4 md:gap-6 lg:min-h-0 ${
-            isCounselingPage ? "lg:grid-cols-[minmax(0,1fr)_320px]" : ""
-          }`}
+          className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-hidden lg:grid-cols-[minmax(0,1fr)_320px]"
         >
-          <main className="min-w-0 lg:min-h-0">
+          <main className="min-h-0 min-w-0 overflow-hidden">
             <Outlet
               context={{
                 selectedChat,
@@ -323,53 +319,44 @@ function AppShell() {
             />
           </main>
 
-          {isCounselingPage && (
-            <aside className="flex min-w-0 flex-col gap-4 lg:min-h-0">
-              <div
-                className="rounded-[2rem] border p-6"
-                style={{
-                  background: "#ffffff",
-                  borderColor: "#edf2f7",
-                  boxShadow: "0 12px 32px rgba(15, 23, 42, 0.05)",
-                }}
+          <aside className="hidden h-full min-h-0 min-w-0 grid-rows-[minmax(0,1.15fr)_minmax(0,0.85fr)] gap-3 overflow-hidden lg:grid">
+            <div
+              className="flex min-h-0 flex-col rounded-[1.5rem] border p-4"
+              style={{
+                background: "#ffffff",
+                borderColor: "#edf2f7",
+                boxShadow: "0 12px 32px rgba(15, 23, 42, 0.05)",
+              }}
+            >
+              <p
+                className="text-[11px] font-semibold uppercase tracking-[0.2em]"
+                style={{ color: theme?.strong || "#4fa36c" }}
               >
-                <p
-                  className="text-xs font-semibold uppercase tracking-[0.28em]"
-                  style={{ color: theme?.strong || "#4fa36c" }}
-                >
-                  AVATAR
-                </p>
+                AVATAR
+              </p>
 
-                <h3
-                  className="mt-3 text-[2rem] font-extrabold leading-none"
-                  style={{ color: "#1f2a3d" }}
-                >
-                  {assistantName}
-                </h3>
+              <h3 className="mt-2 text-2xl font-extrabold leading-none" style={{ color: "#1f2a3d" }}>
+                {assistantName}
+              </h3>
 
-                <p className="mt-4 text-[15px] leading-7" style={{ color: "#6b7b95" }}>
-                  업로드한 아바타 이미지가 그대로 표시됩니다.
-                </p>
+              <p className="mt-2 text-sm leading-6" style={{ color: "#6b7b95" }}>
+                업로드한 아바타 이미지가 그대로 표시됩니다.
+              </p>
 
-                <div
-                  className="mt-5 flex justify-center rounded-[1.8rem] p-5"
-                  style={{ background: theme?.avatar?.surface || theme?.soft || "#f2faf4" }}
-                >
-                  <img
-                    src={theme?.avatar?.image}
-                    alt="avatar"
-                    className="h-64 w-full max-w-[260px] object-contain"
-                  />
-                </div>
+              <div
+                className="mt-3 flex min-h-0 flex-1 items-center justify-center rounded-[1.5rem] p-3"
+                style={{ background: theme?.avatar?.surface || theme?.soft || "#f2faf4" }}
+              >
+                <SlimeAvatar avatar={theme.avatar} size="fit" />
               </div>
+            </div>
 
-              <MusicCard
-                theme={theme}
-                emotion={analysisEmotion}
-                songs={getRecommendedSongs(analysisEmotion, 3)}
-              />
-            </aside>
-          )}
+            <MusicCard
+              theme={theme}
+              emotion={analysisEmotion}
+              songs={getRecommendedSongs(analysisEmotion, 3)}
+            />
+          </aside>
         </div>
       </div>
     </div>

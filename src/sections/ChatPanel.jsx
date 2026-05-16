@@ -65,15 +65,15 @@ function ChatPanel({
 
   return (
     <section className="panel flex h-full min-h-0 flex-col overflow-hidden">
-      <div className="shrink-0 border-b border-slate-100 px-5 py-5 md:px-8">
+      <div className="shrink-0 border-b border-slate-100 px-5 py-4 md:px-6">
         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[color:var(--theme-strong)]">
           MindBridge Chat
         </p>
         <div className="mt-2 flex items-center justify-between gap-4">
           <div>
             <h2 className="text-2xl font-bold text-ink">{selectedChat?.title || "새 상담"}</h2>
-            <p className="mt-2 text-sm text-slate-500">
-              메시지는 채팅 서비스와 연동되어 저장됩니다. AI 답변은 현재 임시 문구입니다.
+            <p className="mt-1 text-sm text-slate-500">
+              메시지는 채팅 서비스와 연동되어 저장됩니다.
             </p>
           </div>
           <div className="hidden rounded-2xl bg-slate-50 px-4 py-3 text-sm font-medium text-slate-500 md:block">
@@ -83,7 +83,7 @@ function ChatPanel({
       </div>
 
       <div ref={messageListRef} className="soft-scrollbar min-h-0 flex-1 overflow-y-auto bg-[#fcfbf8]">
-        <div className="h-full space-y-6 px-5 py-6 md:px-8">
+        <div className="min-h-full space-y-5 px-5 py-5 md:px-6">
           {chatStatus === "loading" && (
             <div className="rounded-2xl bg-white px-4 py-4 text-sm text-slate-500 shadow-sm">
               대화 기록을 불러오는 중입니다.
@@ -146,7 +146,7 @@ function ChatPanel({
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="shrink-0 border-t border-slate-100 bg-white px-5 py-5 md:px-8">
+      <form onSubmit={handleSubmit} className="shrink-0 border-t border-slate-100 bg-white px-5 py-4 md:px-6">
         <div className="flex flex-col gap-3">
           <textarea
             rows="3"
@@ -154,7 +154,7 @@ function ChatPanel({
             onChange={(event) => setDraft(event.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="지금의 감정이나 상황을 적어보세요"
-            className="min-h-[120px] flex-1 resize-none rounded-[28px] border border-slate-200 bg-slate-50 px-5 py-4 text-sm outline-none transition focus:bg-white focus:ring-4"
+            className="min-h-[96px] flex-1 resize-none rounded-[24px] border border-slate-200 bg-slate-50 px-5 py-4 text-sm outline-none transition focus:bg-white focus:ring-4"
             style={{ ["--tw-ring-color"]: theme.ring }}
           />
 

@@ -419,7 +419,7 @@ function EmotionAnalysisPanel() {
             사용자 대화에서 직접 나온 표현만 기준으로 묶었습니다.
           </p>
           <div className="mt-4 grid gap-3 md:grid-cols-2">
-            {currentAnalysis.frequentWords.map((group) => (
+            {currentAnalysis.frequentWords.slice(0, 2).map((group) => (
               <div key={group.label} className="rounded-2xl bg-white/85 px-4 py-4 shadow-sm">
                 <div className="text-sm font-semibold text-ink">{group.label}</div>
                 <div className="mt-3 flex flex-wrap gap-2">

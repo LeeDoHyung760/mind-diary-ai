@@ -27,7 +27,7 @@ function getConnectedAccounts(user) {
 function SettingCard({ title, children, className = "" }) {
   return (
     <section
-      className={`rounded-[22px] border p-5 md:p-6 ${className}`}
+      className={`rounded-[18px] border p-3 md:p-4 ${className}`}
       style={{
         borderColor: "color-mix(in srgb, var(--theme-strong) 18%, rgba(15, 23, 42, 0.1))",
         background:
@@ -36,20 +36,20 @@ function SettingCard({ title, children, className = "" }) {
     >
       <div>
         <div
-          className="text-[17px] font-bold"
+          className="text-base font-bold"
           style={{ color: "color-mix(in srgb, var(--theme-strong) 42%, rgb(25, 38, 38))" }}
         >
           {title}
         </div>
       </div>
-      <div className="mt-5">{children}</div>
+      <div className="mt-3">{children}</div>
     </section>
   );
 }
 
 function AccountRow({ label, children }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 px-4 py-4 first:border-t-0">
+    <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 px-3 py-2.5 first:border-t-0">
       <span className="text-sm font-semibold text-slate-700">{label}</span>
       <div className="min-w-0 text-sm text-slate-500">{children}</div>
     </div>
@@ -136,10 +136,10 @@ function SettingsPage() {
   };
 
   return (
-    <section className="panel h-full min-h-0 overflow-hidden p-4 md:p-8">
+    <section className="panel h-full min-h-0 overflow-hidden p-3 md:p-4">
       <div className="mx-auto flex h-full min-h-0 max-w-6xl flex-col">
         <div
-          className="flex h-full min-h-0 flex-col overflow-hidden rounded-[30px] border p-5 shadow-sm md:p-7"
+          className="flex h-full min-h-0 flex-col overflow-hidden rounded-[24px] border p-4 shadow-sm md:p-5"
           style={{
             borderColor: "color-mix(in srgb, var(--theme-strong) 20%, rgba(15, 23, 42, 0.08))",
             background:
@@ -147,7 +147,7 @@ function SettingsPage() {
             boxShadow: "0 14px 38px rgba(15, 23, 42, 0.06)",
           }}
         >
-          <div className="flex flex-col gap-2 border-b border-slate-200/70 pb-5 md:flex-row md:items-end md:justify-between">
+          <div className="flex flex-col gap-2 border-b border-slate-200/70 pb-3 md:flex-row md:items-end md:justify-between">
             <div>
               <p
                 className="text-[11px] font-bold uppercase tracking-[0.28em]"
@@ -155,8 +155,8 @@ function SettingsPage() {
               >
                 Setting
               </p>
-              <h1 className="mt-2 text-3xl font-extrabold text-ink">설정</h1>
-              <p className="mt-2 text-sm text-slate-500">
+              <h1 className="mt-1 text-2xl font-extrabold text-ink">설정</h1>
+              <p className="mt-1 text-sm text-slate-500">
                 기존 프로필 설정은 유지하고, 계정과 소리 설정을 분리해서 적용했습니다.
               </p>
             </div>
@@ -174,9 +174,9 @@ function SettingsPage() {
             </button>
           </div>
 
-          <div className="mt-6 flex-1 min-h-0 overflow-y-auto pr-1">
-            <div className="grid min-h-full gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-            <form onSubmit={handleSaveProfile} className="space-y-5">
+          <div className="mt-4 min-h-0 flex-1 overflow-hidden">
+            <div className="grid h-full min-h-0 gap-4 xl:grid-cols-[1.05fr_0.95fr]">
+            <form onSubmit={handleSaveProfile} className="min-h-0">
               <SettingCard
                 title="프로필 설정"
               >
@@ -189,13 +189,13 @@ function SettingsPage() {
                   onChange={(event) => setAssistantName(event.target.value)}
                   placeholder="동반자의 이름을 입력해 주세요"
                   maxLength={16}
-                  className="mt-3 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition"
+                  className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none transition"
                   style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7)" }}
                 />
 
-                <div className="mt-6">
+                <div className="mt-4">
                   <div className="text-sm font-semibold text-slate-700">아바타</div>
-                  <div className="mt-4 grid gap-3">
+                  <div className="mt-3 grid gap-2">
                     {avatarOptions.map((option) => {
                       const isSelected = selectedAvatar.id === option.id;
 
@@ -204,7 +204,7 @@ function SettingsPage() {
                           key={option.id}
                           type="button"
                           onClick={() => setSelectedAvatar(option)}
-                          className="flex items-center justify-between rounded-[18px] border px-4 py-4 text-left transition"
+                          className="flex items-center justify-between rounded-[16px] border px-3 py-2.5 text-left transition"
                           style={{
                             borderColor: isSelected
                               ? "var(--theme-strong)"
@@ -219,10 +219,10 @@ function SettingsPage() {
                         >
                           <span className="flex items-center gap-4">
                             <span
-                              className="flex h-14 w-14 items-center justify-center rounded-2xl"
+                              className="flex h-11 w-11 items-center justify-center rounded-2xl"
                               style={{ backgroundColor: option.surface }}
                             >
-                              <img src={option.image} alt={option.label} className="h-12 w-10 object-contain" />
+                              <img src={option.image} alt={option.label} className="h-9 w-8 object-contain" />
                             </span>
                             <span>
                               <span className="block text-sm font-semibold text-slate-700">{option.label}</span>
@@ -250,11 +250,11 @@ function SettingsPage() {
                   </div>
                 )}
 
-                <div className="mt-6 flex flex-wrap items-center gap-3">
+                <div className="mt-4 flex flex-wrap items-center gap-3">
                   <button
                     type="submit"
                     disabled={isSubmitting || !assistantName.trim()}
-                    className="rounded-xl px-5 py-3 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:bg-slate-300"
+                    className="rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:bg-slate-300"
                     style={{ backgroundColor: "var(--theme-strong)" }}
                   >
                     {isSubmitting ? "저장 중..." : "프로필 저장"}
@@ -262,7 +262,7 @@ function SettingsPage() {
                   <button
                     type="button"
                     onClick={() => setIsPreviewOpen((previous) => !previous)}
-                    className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                    className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
                   >
                     {isPreviewOpen ? "미리보기 닫기" : "미리보기 열기"}
                   </button>
@@ -271,18 +271,18 @@ function SettingsPage() {
               </SettingCard>
             </form>
 
-            <div className="space-y-5">
+            <div className="min-h-0 space-y-4 overflow-hidden">
               {isPreviewOpen && (
                 <SettingCard title="미리보기">
-                  <div className="grid gap-4 md:grid-cols-[0.95fr_1.05fr]">
+                  <div className="grid items-stretch gap-3 md:grid-cols-[150px_minmax(0,1fr)]">
                     <div
-                      className="flex min-h-[220px] items-center justify-center rounded-[24px]"
+                      className="flex h-[150px] items-center justify-center rounded-[20px] p-3"
                       style={{ backgroundColor: selectedAvatar.surface }}
                     >
-                      <SlimeAvatar avatar={selectedAvatar} size="large" />
+                      <SlimeAvatar avatar={selectedAvatar} size="fit" />
                     </div>
 
-                    <div className="rounded-[22px] border border-white/70 bg-white/80 px-5 py-5">
+                    <div className="min-w-0 rounded-[18px] border border-white/70 bg-white/80 px-4 py-4">
                       <div className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-400">
                         Assistant
                       </div>
@@ -322,7 +322,7 @@ function SettingsPage() {
                   </AccountRow>
                 </div>
 
-                <div className="mt-5 rounded-2xl border border-slate-200/80 bg-white/85 px-4 py-4">
+                <div className="mt-3 rounded-2xl border border-slate-200/80 bg-white/85 px-3 py-3">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="text-sm font-semibold text-slate-700">연결계정 변경</div>
                     <button
@@ -340,7 +340,7 @@ function SettingsPage() {
                   </div>
 
                   {showAccountChangePanel && (
-                    <div className="mt-4 rounded-xl border border-slate-200 bg-white px-4 py-4" />
+                    <div className="mt-3 rounded-xl border border-slate-200 bg-white px-3 py-3" />
                   )}
                 </div>
               </SettingCard>
@@ -348,7 +348,7 @@ function SettingsPage() {
               <SettingCard
                 title="소리 설정"
               >
-                <div className="rounded-2xl border border-slate-200/80 bg-white/85 px-4 py-5">
+                <div className="rounded-2xl border border-slate-200/80 bg-white/85 px-3 py-3">
                   <div className="flex items-center justify-between gap-4">
                     <label htmlFor="settings-volume" className="text-sm font-semibold text-slate-700">
                       전체 볼륨
@@ -372,10 +372,10 @@ function SettingsPage() {
                     onMouseUp={() => persistSoundSettings()}
                     onTouchEnd={() => persistSoundSettings()}
                     onKeyUp={() => persistSoundSettings()}
-                    className="mt-4 w-full accent-[color:var(--theme-strong)]"
+                    className="mt-3 w-full accent-[color:var(--theme-strong)]"
                   />
 
-                  <div className="mt-5 flex flex-wrap gap-3">
+                  <div className="mt-3 flex flex-wrap gap-3">
                     <button
                       type="button"
                       onClick={() => {

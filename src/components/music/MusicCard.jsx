@@ -28,30 +28,30 @@ export default function MusicCard({
 
   return (
     <div
-      className="rounded-[2rem] border p-6"
+      className="flex min-h-0 flex-col overflow-hidden rounded-[1.5rem] border p-4"
       style={{
         background: colors.panelBg,
         borderColor: colors.panelBorder,
         boxShadow: colors.panelShadow,
       }}
     >
-      <div className="mb-6">
+      <div className="mb-3">
         <p
-          className="text-xs font-semibold uppercase tracking-[0.28em]"
+            className="text-[11px] font-semibold uppercase tracking-[0.2em]"
           style={{ color: colors.label }}
         >
           {title}
         </p>
 
         <h3
-          className="mt-3 text-[2rem] font-extrabold leading-none"
+          className="mt-2 text-xl font-extrabold leading-none"
           style={{ color: colors.title }}
         >
           추천 음악
         </h3>
 
         <p
-          className="mt-4 text-[15px] leading-7"
+          className="mt-2 line-clamp-1 text-xs leading-5"
           style={{ color: colors.body }}
         >
           지금은 플레이 UI만 두고, 실제 재생 연결은 다음 단계에서 붙입니다.
@@ -59,21 +59,21 @@ export default function MusicCard({
       </div>
 
       {hasSongs ? (
-        <div className="space-y-4">
+        <div className="flex min-h-0 flex-1 flex-col justify-evenly gap-2">
           {songs.map((song, index) => {
             const isFirst = index === 0;
 
             return (
               <div
                 key={`${song.title}-${song.artist}-${index}`}
-                className="flex items-center justify-between gap-4 rounded-[1.6rem] px-6 py-5"
+                className="flex items-center justify-between gap-3 rounded-[1.15rem] px-4 py-3"
                 style={{
                   background: isFirst ? colors.soft : colors.softAlt,
                 }}
               >
                 <div className="min-w-0">
                   <p
-                    className="truncate text-[18px] font-medium"
+                    className="truncate text-sm font-medium"
                     style={{
                       color: isFirst ? colors.strong : "#405069",
                     }}
@@ -86,7 +86,7 @@ export default function MusicCard({
                 <button
                   type="button"
                   onClick={() => openSong(song)}
-                  className="shrink-0 rounded-full px-6 py-3 text-[15px] font-bold transition hover:opacity-90"
+                  className="shrink-0 rounded-full px-4 py-2 text-sm font-bold transition hover:opacity-90"
                   style={{
                     background: isFirst ? colors.strong : colors.strongDark,
                     color: "#ffffff",
@@ -100,7 +100,7 @@ export default function MusicCard({
         </div>
       ) : (
         <div
-          className="rounded-[1.6rem] px-6 py-5"
+          className="rounded-[1.15rem] px-4 py-3"
           style={{ background: colors.softAlt }}
         >
           <p

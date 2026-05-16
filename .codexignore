@@ -1,0 +1,53 @@
+# Environment and secret files
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+!.env.sample
+!**/.env.example
+!**/.env.sample
+
+# Backend environment files
+backend/.env
+backend/.env.*
+!backend/.env.example
+!backend/.env.sample
+
+# Credentials, tokens, keys, and certificates
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+*.der
+*.jks
+*.keystore
+*.kdbx
+*secret*
+*secrets*
+*credential*
+*credentials*
+*token*
+*apikey*
+*api_key*
+*client_secret*
+*service-account*
+
+# Git and local editor metadata
+.git/
+.idea/
+.vscode/
+
+# Local dependencies and generated artifacts
+node_modules/
+dist/
+backend/.venv/
+__pycache__/
+**/__pycache__/
+.pytest_cache/
+*.pyc
+*.pyo
+*.pyd
+*.log

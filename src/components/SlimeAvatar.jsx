@@ -3,18 +3,21 @@ function SlimeAvatar({ avatar, size = "large" }) {
     small: "h-12 w-12",
     medium: "h-28 w-24",
     large: "h-[250px] w-[210px]",
+    fit: "h-full max-h-[220px] w-full max-w-[190px]",
   };
 
   const frameSizes = {
     small: "rounded-2xl p-0.5",
     medium: "rounded-[26px] p-1",
     large: "rounded-[34px] p-1",
+    fit: "rounded-[28px] p-1",
   };
 
   const imageClasses = {
     small: "h-full w-full scale-110 object-contain",
     medium: "h-full w-full scale-[1.18] object-contain",
     large: "h-full w-full scale-[1.22] object-contain",
+    fit: "h-full w-full scale-[1.14] object-contain",
   };
 
   const wrapperSize = sizes[size] || sizes.large;

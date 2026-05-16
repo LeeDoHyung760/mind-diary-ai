@@ -18,12 +18,17 @@ logger = logging.getLogger(__name__)
 
 
 def _serialize_message(message):
-    return {
+    serialized = {
         "id": message.get("id"),
         "sender": message.get("sender"),
         "text": message.get("text"),
         "createdAt": serialize_datetime(message.get("createdAt")),
     }
+
+    if "emotion" in message:
+        serialized["emotion"] = message.get("emotion")
+
+    return serialized
 
 
 def _build_chat_title(text):

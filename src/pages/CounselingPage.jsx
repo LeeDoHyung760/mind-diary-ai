@@ -1,13 +1,12 @@
 import { useOutletContext } from "react-router-dom";
 import ChatPanel from "../sections/ChatPanel";
-import CompanionPanel from "../sections/CompanionPanel";
 
 function CounselingPage() {
   const { selectedChat, currentUser, theme, chatStatus, chatError, onSendMessage } =
     useOutletContext();
 
   return (
-    <div className="grid h-full min-h-0 gap-4 xl:grid-cols-[2fr_1fr]">
+    <div className="h-full min-h-0">
       <ChatPanel
         selectedChat={selectedChat}
         currentUser={currentUser}
