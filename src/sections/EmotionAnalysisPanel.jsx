@@ -1,16 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { getStoredGuestChats } from "../storage/chatStorage";
 
-const MONTHS = Array.from({ length: 12 }, (_, index) => ({
-  value: index + 1,
-  label: `${index + 1}월`,
-}));
-const WEEK_DAYS = ["일", "월", "화", "수", "목", "금", "토"];
-
 const EMOTION_COLORS = {
   기쁨: "bg-emerald-500",
   불안: "bg-amber-400",
   분노: "bg-rose-400",
+  화남: "bg-rose-400",
   슬픔: "bg-sky-400",
   상처: "bg-purple-400",
   당황: "bg-orange-400",
@@ -32,6 +27,11 @@ const EMOTION_INSIGHTS = {
     "즉각 반응을 줄이고 거리 두기 문장을 먼저 꺼내는 편이 도움이 됩니다.",
     "무엇이 가장 거슬렸는지 짧게 분리해 적어보면 감정이 가라앉습니다.",
   ],
+  화남: [
+    "답답함과 짜증 표현이 반복되며 대화 전반을 끌고 갔습니다.",
+    "즉각 반응을 줄이고 거리 두기 문장을 먼저 꺼내는 편이 도움이 됩니다.",
+    "무엇이 가장 거슬렸는지 짧게 분리해 적어보면 감정이 가라앉습니다.",
+  ],
   슬픔: [
     "에너지 저하와 무기력 표현이 길게 이어졌습니다.",
     "일정 밀도를 낮추고, 몸을 쓰는 짧은 활동을 함께 두는 편이 좋습니다.",
@@ -49,6 +49,54 @@ const EMOTION_INSIGHTS = {
   ],
 };
 
+const LETTERS_BY_EMOTION = {
+  기쁨: [
+    "안녕, 오늘의 너에게 :)",
+    "오늘은 기쁜 마음이 반짝 올라온 하루였구나.",
+    "이 좋은 감각을 그냥 흘려보내지 말고, 무엇이 너를 편하게 했는지 짧게 남겨보자.",
+    "작은 기쁨을 잘 기억해두면 다음 날의 너에게도 귀여운 선물이 될 거야.",
+  ],
+  불안: [
+    "안녕, 오늘의 너에게 :)",
+    "오늘은 불안한 마음이 조금 크게 올라온 하루였구나.",
+    "그럴 땐 해야 할 일을 한 번에 다 보려고 하지 말고, 아주 작은 것 하나만 골라서 천천히 시작해보자.",
+    "따뜻한 물 한 잔 마시고, 어깨 힘을 살짝 빼줘. 너는 지금도 충분히 잘 버티고 있어.",
+  ],
+  분노: [
+    "안녕, 오늘의 너에게 :)",
+    "오늘은 답답하고 거슬리는 마음이 꽤 크게 지나갔구나.",
+    "바로 해결하려고 애쓰기보다, 먼저 숨을 길게 내쉬고 마음의 온도를 살짝 낮춰보자.",
+    "말하기 전에 물 한 모금, 문장 하나 쉬어가기. 그 작은 멈춤이 너를 지켜줄 거야.",
+  ],
+  화남: [
+    "안녕, 오늘의 너에게 :)",
+    "오늘은 답답하고 거슬리는 마음이 꽤 크게 지나갔구나.",
+    "바로 해결하려고 애쓰기보다, 먼저 숨을 길게 내쉬고 마음의 온도를 살짝 낮춰보자.",
+    "말하기 전에 물 한 모금, 문장 하나 쉬어가기. 그 작은 멈춤이 너를 지켜줄 거야.",
+  ],
+  슬픔: [
+    "안녕, 오늘의 너에게 :)",
+    "오늘은 마음이 조금 축축하고 무거웠던 날이었구나.",
+    "억지로 괜찮은 척하지 않아도 돼. 조용히 숨을 고르고, 네 마음이 쉬어갈 자리를 조금만 만들어주자.",
+    "작은 위로 하나를 꼭 챙겨줘. 따뜻한 담요, 좋아하는 노래, 짧은 산책이면 충분해.",
+  ],
+  상처: [
+    "안녕, 오늘의 너에게 :)",
+    "오늘은 마음 한쪽이 조금 콕 하고 아팠던 하루였구나.",
+    "서운했던 마음을 바로 밀어내지 말고, 내가 무엇을 바랐는지 조용히 적어보자.",
+    "네 마음이 예민해서가 아니라, 소중한 것을 지키고 싶었던 걸 수도 있어.",
+  ],
+  당황: [
+    "안녕, 오늘의 너에게 :)",
+    "오늘은 예상하지 못한 일 때문에 마음이 조금 흔들렸구나.",
+    "지금 바로 답을 찾으려고 하지 않아도 돼. 일어난 일과 내가 할 수 있는 일을 나눠서 봐보자.",
+    "잠깐 멈추고 숨을 고르면, 다음 한 걸음이 조금 더 또렷해질 거야.",
+  ],
+};
+
+const letterFont =
+  "'Gaegu', 'NanumSquareRound', 'NanumSquareRoundOTF', 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif";
+
 function formatDateLabel(dateKey) {
   const [year, month, day] = dateKey.split("-").map(Number);
   return `${year}년 ${month}월 ${day}일`;
@@ -59,21 +107,12 @@ function parseDateParts(dateKey) {
   return { year, month, day };
 }
 
-function getCalendarDays(year, month) {
-  const count = new Date(year, month, 0).getDate();
-  return Array.from({ length: count }, (_, index) => index + 1);
-}
-
 function truncateText(text, maxLength = 20) {
-  return text.length > maxLength ? text.slice(0, maxLength) + "…" : text;
+  return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
 }
 
 function EmotionAnalysisPanel() {
   const [selectedDate, setSelectedDate] = useState(null);
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
-  const [pickerStep, setPickerStep] = useState("year");
-  const [pickerAnimation, setPickerAnimation] = useState("calendar-step-enter");
 
   const dailyAnalysis = useMemo(() => {
     const chats = getStoredGuestChats();
@@ -140,54 +179,18 @@ function EmotionAnalysisPanel() {
     [dailyAnalysis]
   );
 
-  const availableYears = useMemo(
-    () => [...new Set(availableDates.map((d) => d.year))].sort((a, b) => a - b),
-    [availableDates]
-  );
-
   useEffect(() => {
     if (!selectedDate && availableDates.length > 0) {
       const sorted = [...availableDates].sort((a, b) => b.key.localeCompare(a.key));
       const latest = sorted[0];
       setSelectedDate(latest.key);
-      setSelectedYear(latest.year);
-      setSelectedMonth(latest.month);
     }
   }, [availableDates, selectedDate]);
 
   const currentAnalysis = dailyAnalysis[selectedDate];
-
-  const availableMonths = useMemo(
-    () =>
-      new Set(
-        availableDates.filter((item) => item.year === selectedYear).map((item) => item.month)
-      ),
-    [availableDates, selectedYear]
-  );
-
-  const availableDays = useMemo(
-    () =>
-      new Set(
-        availableDates
-          .filter((item) => item.year === selectedYear && item.month === selectedMonth)
-          .map((item) => item.day)
-      ),
-    [availableDates, selectedMonth, selectedYear]
-  );
-
-  const days = getCalendarDays(selectedYear, selectedMonth);
-
-  const moveStep = (nextStep) => {
-    setPickerAnimation("calendar-step-enter");
-    setPickerStep(nextStep);
-  };
-
-  useEffect(() => {
-    const timeout = window.setTimeout(() => {
-      setPickerAnimation("");
-    }, 320);
-    return () => window.clearTimeout(timeout);
-  }, [pickerStep]);
+  const letterLines = currentAnalysis
+    ? LETTERS_BY_EMOTION[currentAnalysis.dominant] || LETTERS_BY_EMOTION.불안
+    : LETTERS_BY_EMOTION.불안;
 
   if (availableDates.length === 0) {
     return (
@@ -232,8 +235,7 @@ function EmotionAnalysisPanel() {
         </div>
       </div>
 
-      <div className="mt-4 grid min-h-0 flex-1 gap-4 lg:grid-cols-[1.08fr_0.92fr]">
-        {/* 1. 감정 분석 결과 */}
+      <div className="mt-4 grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(300px,0.95fr)] lg:grid-rows-2">
         <div className="rounded-[24px] bg-slate-50 p-5">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -267,137 +269,49 @@ function EmotionAnalysisPanel() {
           </div>
         </div>
 
-        {/* 2. 다른 날의 감정 보기 */}
-        <div className="rounded-[24px] border border-dashed border-brand-200 bg-brand-50/60 p-4">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="text-sm font-semibold text-brand-700">다른 날의 감정 보기</div>
-              <p className="mt-1 text-xs text-slate-500">
-                연도, 월, 일을 순서대로 눌러 기록을 확인합니다.
-              </p>
-            </div>
-            <div className="rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-slate-500">
-              {pickerStep === "year" ? "연도" : pickerStep === "month" ? "월" : "일"}
-            </div>
-          </div>
-
-          <div className="mt-3 rounded-[20px] bg-white/92 p-3 shadow-sm">
-            <div className="mb-3 grid grid-cols-3 gap-2">
-              {(availableYears.length > 0 ? availableYears : [new Date().getFullYear()]).map(
-                (year) => {
-                  const isActive = selectedYear === year;
-                  return (
-                    <button
-                      key={year}
-                      type="button"
-                      onClick={() => {
-                        setSelectedYear(year);
-                        moveStep("month");
-                      }}
-                      className={`rounded-2xl px-3 py-2 text-sm font-semibold transition ${
-                        isActive
-                          ? "bg-brand-700 text-white"
-                          : "bg-slate-100 text-slate-600 hover:bg-brand-50 hover:text-brand-700"
-                      }`}
-                    >
-                      {year}
-                    </button>
-                  );
-                }
-              )}
+        <div className="relative flex min-h-0 flex-col overflow-hidden rounded-[24px] border border-amber-100 bg-[#fff7df] p-6 shadow-[0_16px_36px_rgba(180,128,58,0.12)] lg:row-span-2">
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.5)_1px,transparent_1px)] bg-[length:100%_34px]" />
+          <div className="relative flex h-full min-h-0 flex-col">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-600">
+                  Letter
+                </p>
+                <h2
+                  className="mt-2 text-xl font-bold text-amber-950"
+                  style={{ fontFamily: letterFont }}
+                >
+                  오늘의 마음 편지
+                </h2>
+              </div>
+              <div
+                className="rounded-full bg-white/75 px-3 py-1.5 text-xs font-semibold text-amber-700 shadow-sm"
+                style={{ fontFamily: letterFont }}
+              >
+                {currentAnalysis.dominant} 우세
+              </div>
             </div>
 
-            <div className={`calendar-step-panel ${pickerAnimation}`}>
-              {pickerStep === "year" && (
-                <div className="rounded-2xl bg-slate-50 px-4 py-5 text-center text-sm font-medium text-slate-500">
-                  먼저 연도를 선택해 주세요.
-                </div>
-              )}
+            <div
+              className="mt-6 flex min-h-0 flex-1 flex-col justify-center rounded-[25px] bg-white/55 px-5 py-5 text-[27px] font-medium leading-8 text-amber-950 shadow-inner"
+              style={{ fontFamily: letterFont }}
+            >
+              {letterLines.map((line) => (
+                <p key={line} className="mb-4 last:mb-0">
+                  {line}
+                </p>
+              ))}
+            </div>
 
-              {pickerStep === "month" && (
-                <div className="grid grid-cols-3 gap-2">
-                  {MONTHS.map((month) => {
-                    const hasData = availableMonths.has(month.value);
-                    const isActive = selectedMonth === month.value;
-
-                    return (
-                      <button
-                        key={month.value}
-                        type="button"
-                        disabled={!hasData}
-                        onClick={() => {
-                          setSelectedMonth(month.value);
-                          moveStep("day");
-                        }}
-                        className={`rounded-2xl px-3 py-4 text-sm font-semibold transition ${
-                          isActive
-                            ? "bg-brand-700 text-white"
-                            : hasData
-                              ? "bg-slate-50 text-slate-700 hover:bg-brand-50 hover:text-brand-700"
-                              : "cursor-not-allowed bg-slate-50/70 text-slate-300"
-                        }`}
-                      >
-                        {month.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-
-              {pickerStep === "day" && (
-                <>
-                  <div className="mb-2 flex items-center justify-between">
-                    <button
-                      type="button"
-                      onClick={() => moveStep("month")}
-                      className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-500"
-                    >
-                      월 다시 선택
-                    </button>
-                    <div className="text-[11px] font-medium text-slate-400">
-                      {selectedYear}.{String(selectedMonth).padStart(2, "0")}
-                    </div>
-                  </div>
-                  <div className="mb-2 grid grid-cols-7 gap-1 text-center text-[10px] font-semibold text-slate-400">
-                    {WEEK_DAYS.map((day) => (
-                      <div key={day}>{day}</div>
-                    ))}
-                  </div>
-                  <div className="grid grid-cols-7 gap-1">
-                    {days.map((day) => {
-                      const dateKey = `${selectedYear}-${String(selectedMonth).padStart(
-                        2,
-                        "0"
-                      )}-${String(day).padStart(2, "0")}`;
-                      const hasData = availableDays.has(day);
-                      const isSelected = selectedDate === dateKey;
-
-                      return (
-                        <button
-                          key={dateKey}
-                          type="button"
-                          disabled={!hasData}
-                          onClick={() => setSelectedDate(dateKey)}
-                          className={`h-8 rounded-lg text-[11px] font-semibold transition ${
-                            isSelected
-                              ? "bg-brand-700 text-white"
-                              : hasData
-                                ? "bg-slate-50 text-slate-700 hover:bg-brand-50 hover:text-brand-700"
-                                : "cursor-not-allowed bg-slate-50/70 text-slate-300"
-                          }`}
-                        >
-                          {day}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </>
-              )}
+            <div
+              className="relative mt-5 text-right text-sm font-semibold text-amber-800"
+              style={{ fontFamily: letterFont }}
+            >
+              - 마음이가 보냄
             </div>
           </div>
         </div>
 
-        {/* 3. 핵심 해석 */}
         <div className="rounded-[24px] border border-dashed border-brand-200 bg-brand-50/60 p-5">
           <div className="text-sm font-semibold text-brand-700">핵심 해석</div>
           <div className="mt-3 grid gap-2">
@@ -407,31 +321,6 @@ function EmotionAnalysisPanel() {
                 className="rounded-2xl bg-white/85 px-4 py-3 text-sm leading-6 text-slate-600"
               >
                 {item}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* 4. 자주 쓰는 표현 */}
-        <div className="rounded-[24px] border border-dashed border-brand-200 bg-brand-50/60 p-5">
-          <div className="text-sm font-semibold text-brand-700">자주 쓰는 표현</div>
-          <p className="mt-1 text-xs text-slate-500">
-            사용자 대화에서 직접 나온 표현만 기준으로 묶었습니다.
-          </p>
-          <div className="mt-4 grid gap-3 md:grid-cols-2">
-            {currentAnalysis.frequentWords.slice(0, 2).map((group) => (
-              <div key={group.label} className="rounded-2xl bg-white/85 px-4 py-4 shadow-sm">
-                <div className="text-sm font-semibold text-ink">{group.label}</div>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {group.words.map((word) => (
-                    <span
-                      key={word}
-                      className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600"
-                    >
-                      {word}
-                    </span>
-                  ))}
-                </div>
               </div>
             ))}
           </div>

@@ -897,3 +897,11 @@ backend/app/routes/auth.py
 backend/app/services/auth_service.py
   소셜 로그인 흐름
 ```
+
+## 27. localStorage 로그인 보안 주의
+
+현재 프로토타입에서는 로그인 사용자 정보를 localStorage에 저장합니다.
+
+localStorage는 브라우저에 남기 때문에 공용 PC에서는 로그아웃이 필요합니다. 사용자가 보호 페이지에서 브라우저 뒤로가기를 누르거나 로그아웃 버튼을 누를 때 확인창을 띄우고, 확인하면 저장된 사용자 정보를 삭제한 뒤 `/login`으로 이동하도록 처리합니다.
+
+실서비스에서는 localStorage에 로그인 세션 정보를 오래 보관하는 방식보다 httpOnly cookie 또는 서버 세션 방식이 더 안전합니다.

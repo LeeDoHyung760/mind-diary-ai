@@ -897,3 +897,32 @@ backend/app/routes/auth.py
 backend/app/services/auth_service.py
   소셜 로그인 흐름
 ```
+
+## 27. 분석 페이지 편지 카드 폰트 설정
+
+분석 페이지의 `오늘의 마음 편지` 카드 폰트는 사용자가 직접 조정할 수 있습니다.
+
+현재 기준:
+
+```text
+편지 카드 폰트 크기: 27px 고정
+```
+
+관련 파일:
+
+```text
+src/sections/EmotionAnalysisPanel.jsx
+```
+
+폰트 패밀리 설정 위치:
+
+```javascript
+const letterFont = "...";
+```
+
+주의:
+
+```text
+편지 카드의 글자 크기는 27px 기준으로 맞춰둔 상태이므로,
+레이아웃을 수정할 때 이 기준을 유지하거나 변경 내용을 README에 함께 기록해야 합니다.
+```

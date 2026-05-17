@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAppPreferences } from "../lib/useAppPreferences";
 import { useCurrentUser } from "../lib/useCurrentUser";
@@ -32,6 +32,9 @@ function AppShell() {
   const navigate = useNavigate();
   const location = useLocation();
   const currentUser = useCurrentUser();
+  const locationRef = useRef(location);
+  const userRef = useRef(currentUser);
+  const isLeavingRef = useRef(false);
   const { volume, isMuted } = useAppPreferences();
   const theme = getThemeTokens(currentUser);
   const [chatSessions, setChatSessions] = useState([]);
@@ -44,6 +47,61 @@ function AppShell() {
   const selectedChat = chatSessions.find((chat) => chat.id === selectedChatId) || null;
   const analysisEmotion = "calm";
   const assistantName = currentUser?.assistantName || "마음이";
+
+  useEffect(() => {
+    locationRef.current = location;
+  }, [location]);
+
+  useEffect(() => {
+    userRef.current = currentUser;
+  }, [currentUser]);
+
+  useEffect(() => {
+    const currentPath = `${location.pathname}${location.search}${location.hash}`;
+
+    if (window.history.state?.mindbridgeGuardPath !== currentPath) {
+      window.history.pushState(
+        { mindbridgeGuard: true, mindbridgeGuardPath: currentPath },
+        "",
+        currentPath
+      );
+    }
+  }, [location.hash, location.pathname, location.search]);
+
+  useEffect(() => {
+    const handleProtectedBack = () => {
+      if (isLeavingRef.current) {
+        return;
+      }
+
+      const latestUser = userRef.current;
+      const latestLocation = locationRef.current;
+      const latestPath = `${latestLocation.pathname}${latestLocation.search}${latestLocation.hash}`;
+      const isLatestGuest = latestUser?.source === "guest";
+      const message = isLatestGuest
+        ? "뒤로 가면 게스트 체험이 종료됩니다. 계속하시겠습니까?"
+        : "뒤로 가면 로그아웃됩니다. 계속하시겠습니까?";
+
+      if (window.confirm(message)) {
+        isLeavingRef.current = true;
+        resetToLoginState();
+        navigate("/login", { replace: true });
+        return;
+      }
+
+      window.history.pushState(
+        { mindbridgeGuard: true, mindbridgeGuardPath: latestPath },
+        "",
+        latestPath
+      );
+    };
+
+    window.addEventListener("popstate", handleProtectedBack);
+
+    return () => {
+      window.removeEventListener("popstate", handleProtectedBack);
+    };
+  }, [navigate]);
 
   useEffect(() => {
     let isActive = true;
@@ -109,6 +167,13 @@ function AppShell() {
   }, [isMuted, volume]);
 
   const handleAuthAction = () => {
+    const message = isGuest ? "게스트 체험을 종료하시겠습니까?" : "로그아웃 하시겠습니까?";
+
+    if (!window.confirm(message)) {
+      return;
+    }
+
+    isLeavingRef.current = true;
     resetToLoginState();
     navigate("/login");
   };
