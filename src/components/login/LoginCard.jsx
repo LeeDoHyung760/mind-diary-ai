@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { clearCurrentUser, clearGuestUser } from "../../lib/authStorage";
 import { socialProviders } from "../../lib/socialAuth";
+import { clearGuestChats } from "../../storage/chatStorage";
 
 function LoginCard() {
   const navigate = useNavigate();
@@ -8,6 +9,7 @@ function LoginCard() {
   const handleGuestStart = () => {
     clearCurrentUser();
     clearGuestUser();
+    clearGuestChats();
     navigate("/onboarding");
   };
 

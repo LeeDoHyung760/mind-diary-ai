@@ -118,13 +118,7 @@ function AppShell() {
         }
 
         setChatSessions(chats);
-        setSelectedChatId((currentId) => {
-          if (chats.some((chat) => chat.id === currentId)) {
-            return currentId;
-          }
-
-          return chats[0]?.id ?? null;
-        });
+        setSelectedChatId(null);
         setChatStatus("ready");
       } catch (error) {
         if (!isActive) {

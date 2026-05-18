@@ -6,6 +6,7 @@ import {
   saveCurrentUser,
   saveGuestUser,
 } from "../storage/authStorage";
+import { clearGuestChats } from "../storage/chatStorage";
 
 export function loadCurrentUserProfile() {
   return getCurrentUser();
@@ -49,4 +50,5 @@ export function skipOnboarding(user, payload) {
 export function resetToLoginState() {
   clearCurrentUser();
   clearGuestUser();
+  clearGuestChats();
 }

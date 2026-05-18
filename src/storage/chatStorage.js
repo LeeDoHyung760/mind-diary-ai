@@ -45,6 +45,10 @@ export function getStoredGuestChats() {
     .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
 }
 
+export function clearGuestChats() {
+  localStorage.removeItem(GUEST_CHAT_STORAGE_KEY);
+}
+
 export function appendGuestChatMessage(text, chatId, aiText = "...", emotion = null) {
   const chats = readGuestChats();
   const now = new Date().toISOString();
