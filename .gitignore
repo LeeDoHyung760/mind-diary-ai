@@ -28,6 +28,10 @@ bin/
 ### VS Code ###
 .vscode/
 
+### Local agent metadata ###
+.agents/
+.codex/
+
 ### Mac OS ###
 .DS_Store
 
@@ -40,6 +44,10 @@ backend/.env
 backend/.env.*
 !backend/.env.example
 !backend/.env.sample
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+!frontend/.env.sample
 
 ### Node ###
 node_modules/

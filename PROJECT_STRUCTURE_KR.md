@@ -6,64 +6,69 @@
 
 ```text
 mind_app/
-  index.html
   package.json
-  vite.config.js
-  tailwind.config.js
   README.md
   PROJECT_STRUCTURE_KR.md
 
-  src/
-    main.jsx
-    App.jsx
-    index.css
+  frontend/
+    index.html
+    package.json
+    package-lock.json
+    vite.config.js
+    tailwind.config.js
+    postcss.config.js
 
-    assets/
-      avatars/
+    src/
+      main.jsx
+      App.jsx
+      index.css
 
-    components/
-      SlimeAvatar.jsx
-      login/
-      music/
+      assets/
+        avatars/
 
-    layouts/
-      AppShell.jsx
+      components/
+        SlimeAvatar.jsx
+        login/
+        music/
 
-    lib/
-      api.js
-      authStorage.js
-      socialAuth.js
-      theme.js
-      useAppPreferences.js
-      useCurrentUser.js
+      layouts/
+        AppShell.jsx
 
-    pages/
-      LoginPage.jsx
-      OnboardingPage.jsx
-      SocialCallbackPage.jsx
-      CounselingPage.jsx
-      GamePage.jsx
-      SettingsPage.jsx
+      lib/
+        api.js
+        authStorage.js
+        socialAuth.js
+        theme.js
+        useAppPreferences.js
+        useCurrentUser.js
 
-    sections/
-      ChatPanel.jsx
-      ChatHistoryPanel.jsx
-      EmotionAnalysisPanel.jsx
-      CompanionPanel.jsx
-      SupportPanel.jsx
+      pages/
+        LoginPage.jsx
+        OnboardingPage.jsx
+        SocialCallbackPage.jsx
+        CounselingPage.jsx
+        GamePage.jsx
+        SettingsPage.jsx
 
-    services/
-      chatService.js
-      profileService.js
+      sections/
+        ChatPanel.jsx
+        ChatHistoryPanel.jsx
+        EmotionAnalysisPanel.jsx
+        CompanionPanel.jsx
+        SupportPanel.jsx
 
-    storage/
-      authStorage.js
-      chatStorage.js
-      preferencesStorage.js
+      services/
+        chatService.js
+        profileService.js
 
-    utils/
-      chatFormat.js
-      musicHelpers.js
+      storage/
+        authStorage.js
+        chatStorage.js
+        preferencesStorage.js
+
+      utils/
+        chatFormat.js
+        musicHelpers.js
 
   backend/
     run.py
@@ -102,11 +107,11 @@ mind_app/
 ## 프론트엔드 흐름
 
 ```text
-src/main.jsx
-  -> src/App.jsx
-  -> src/layouts/AppShell.jsx
-  -> src/pages/*
-  -> src/sections/*
+frontend/src/main.jsx
+  -> frontend/src/App.jsx
+  -> frontend/src/layouts/AppShell.jsx
+  -> frontend/src/pages/*
+  -> frontend/src/sections/*
 ```
 
 주요 라우트:
@@ -203,8 +208,22 @@ ENABLE_AI_MODELS=true
 프론트엔드:
 
 ```bash
+cd frontend
 npm install
 npm run dev
+```
+
+또는 프로젝트 루트에서:
+
+```bash
+npm run frontend:install
+npm run dev
+```
+
+컨테이너/Codespaces처럼 외부 접속이 필요한 환경에서는:
+
+```bash
+npm run dev -- --host 0.0.0.0
 ```
 
 백엔드:
@@ -224,16 +243,16 @@ http://localhost:5000/api/health
 ## 주의 파일
 
 ```text
-src/layouts/AppShell.jsx
+frontend/src/layouts/AppShell.jsx
   보호 페이지 레이아웃, 뒤로가기 확인, 채팅 상태
 
-src/services/chatService.js
+frontend/src/services/chatService.js
   로그인/게스트 채팅 분기
 
-src/storage/authStorage.js
+frontend/src/storage/authStorage.js
   사용자 localStorage
 
-src/storage/chatStorage.js
+frontend/src/storage/chatStorage.js
   게스트 채팅 localStorage
 
 backend/app/config.py

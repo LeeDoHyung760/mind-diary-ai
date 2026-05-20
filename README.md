@@ -28,8 +28,22 @@ AI: KcELECTRA, EXAONE 연동 코드 포함
 프론트엔드:
 
 ```bash
+cd frontend
 npm install
 npm run dev
+```
+
+또는 프로젝트 루트에서:
+
+```bash
+npm run frontend:install
+npm run dev
+```
+
+컨테이너/Codespaces처럼 외부 접속이 필요한 환경에서는:
+
+```bash
+npm run dev -- --host 0.0.0.0
 ```
 
 기본 주소:
@@ -132,14 +146,14 @@ db.chat_sessions.find().sort({ updatedAt: -1 })
 ## 주요 경로
 
 ```text
-src/App.jsx                         라우팅
-src/layouts/AppShell.jsx            보호 페이지 레이아웃, 채팅 상태
-src/sections/ChatPanel.jsx          상담 채팅 UI
-src/sections/EmotionAnalysisPanel.jsx 분석 페이지
-src/services/chatService.js         로그인/게스트 채팅 분기
-src/storage/authStorage.js          사용자 localStorage
-src/storage/chatStorage.js          게스트 채팅 localStorage
-src/lib/api.js                      백엔드 API 호출
+frontend/src/App.jsx                         라우팅
+frontend/src/layouts/AppShell.jsx            보호 페이지 레이아웃, 채팅 상태
+frontend/src/sections/ChatPanel.jsx          상담 채팅 UI
+frontend/src/sections/EmotionAnalysisPanel.jsx 분석 페이지
+frontend/src/services/chatService.js         로그인/게스트 채팅 분기
+frontend/src/storage/authStorage.js          사용자 localStorage
+frontend/src/storage/chatStorage.js          게스트 채팅 localStorage
+frontend/src/lib/api.js                      백엔드 API 호출
 
 backend/run.py                      Flask 실행 진입점
 backend/app/__init__.py             Flask 앱 생성
@@ -184,6 +198,6 @@ POST   /api/guest/chat
 
 ## 분석 페이지 메모
 
-분석 페이지의 `오늘의 마음 편지` 카드 폰트는 `src/sections/EmotionAnalysisPanel.jsx`의 `letterFont`에서 조정합니다.
+분석 페이지의 `오늘의 마음 편지` 카드 폰트는 `frontend/src/sections/EmotionAnalysisPanel.jsx`의 `letterFont`에서 조정합니다.
 
 현재 편지 본문 폰트 크기는 `27px` 기준입니다.
