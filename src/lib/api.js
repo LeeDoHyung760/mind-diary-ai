@@ -59,7 +59,7 @@ export function deleteUserChat(userId, chatId) {
 }
 
 export async function guestChat(text) {
-  const data = await request("/diary/chat", {
+  const data = await request("/guest/chat", {
     method: "POST",
     body: JSON.stringify({ text }),
   });
@@ -68,12 +68,14 @@ export async function guestChat(text) {
     ...data,
 
     // 백엔드 원본 응답
-    ai_response: data.ai_response,
+    ai_response: data.ai_response || data.reply,
     emotion: data.emotion,
+    tags: data.tags || [],
+    musicRecommendations: data.musicRecommendations || [],
 
     // 프론트 기존 코드 호환용
-    message: data.ai_response,
-    reply: data.ai_response,
+    message: data.ai_response || data.reply,
+    reply: data.ai_response || data.reply,
   };
 }
 

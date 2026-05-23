@@ -41,6 +41,7 @@ function AppShell() {
   const [selectedChatId, setSelectedChatId] = useState(null);
   const [chatStatus, setChatStatus] = useState("idle");
   const [chatError, setChatError] = useState("");
+  const [recommendedMusic, setRecommendedMusic] = useState([]);
   const isCounselingPage = location.pathname.includes("counseling");
   const isGuest = currentUser?.source === "guest";
   const isLoggedIn = Boolean(currentUser?.id) && !isGuest;
@@ -188,14 +189,20 @@ function AppShell() {
   };
 
   const handleSendMessage = async (text) => {
-    const chat = await sendChatMessage(currentUser, selectedChatId, text);
-    handleChatStored(chat);
-  };
+  const result = await sendChatMessage(currentUser, selectedChatId, text);
+
+  handleChatStored(result.chat);
+
+  if (result.musicRecommendations?.length > 0) {
+    setRecommendedMusic(result.musicRecommendations);
+  }
+};
 
   const handleCreateChat = () => {
     setSelectedChatId(null);
     setChatStatus("ready");
     setChatError("");
+    setRecommendedMusic([]);
   };
 
   const handleDeleteChat = async (chatId) => {
@@ -419,7 +426,7 @@ function AppShell() {
             <MusicCard
               theme={theme}
               emotion={analysisEmotion}
-              songs={getRecommendedSongs(analysisEmotion, 3)}
+              songs={recommendedMusic}
             />
           </aside>
         </div>
