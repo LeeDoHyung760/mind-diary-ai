@@ -113,7 +113,7 @@ export default function MusicCard({
             className="mt-2 text-sm"
             style={{ color: colors.body }}
           >
-            감정 분석 후 추천 음악이 표시됩니다.
+              채팅을 입력하면 마음이가 지금 감정에 어울리는 노래를 추천해줄게요.
           </p>
         </div>
       )}

@@ -1,0 +1,9 @@
+Flask==3.1.0
+Flask-Cors==5.0.1
+pymongo==4.11.3
+python-dotenv==1.0.1
+requests==2.32.3
+transformers==4.46.3
+accelerate
+safetensors
+sentencepiece

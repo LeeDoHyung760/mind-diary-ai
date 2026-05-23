@@ -13,6 +13,10 @@ from ..repositories.chat_repository import (
 )
 from ..utils import serialize_datetime, utc_now
 from .errors import ApiError
+from .music_recommendation_service import (
+    extract_tags_from_emotion_result,
+    recommend_music_by_tags,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -80,23 +84,44 @@ def append_chat_message(user_id, payload):
 
     owner_id = _parse_object_id(user_id, "user id")
     now = utc_now()
+
     user_message = {
         "id": str(ObjectId()),
         "sender": "user",
         "text": message_text,
         "createdAt": now,
     }
+
+    emotion_result = {
+        "label": "neutral",
+        "score": 0,
+    }
+
+    tags = ["calm", "healing", "sad"]
+    music_recommendations = []
+
     try:
         emotion_result = emotion_model.classify(message_text)
-        ai_text = chat_model.generate(message_text, emotion_result["label"])
+        tags = extract_tags_from_emotion_result(emotion_result)
+        ai_text = chat_model.generate(message_text, emotion_result.get("label", "neutral"))
+
     except Exception:
         logger.exception("AI 응답 생성 실패")
         ai_text = "죄송합니다. 일시적인 오류가 발생했습니다. 다시 말씀해 주세요."
+
+    try:
+        music_result = recommend_music_by_tags(tags, limit=4)
+        music_recommendations = music_result.get("tracks", [])
+
+    except Exception:
+        logger.exception("음악 추천 생성 실패")
+        music_recommendations = []
 
     ai_message = {
         "id": str(ObjectId()),
         "sender": "ai",
         "text": ai_text,
+        "emotion": emotion_result,
         "createdAt": now,
     }
 
@@ -111,7 +136,14 @@ def append_chat_message(user_id, payload):
         if updated_chat is None:
             raise ApiError("Chat not found.", 404)
 
-        return serialize_chat(updated_chat), False
+        response = {
+            "chat": serialize_chat(updated_chat),
+            "emotion": emotion_result,
+            "tags": tags,
+            "musicRecommendations": music_recommendations,
+        }
+
+        return response, False
 
     created_chat = insert_chat(
         {
@@ -122,7 +154,15 @@ def append_chat_message(user_id, payload):
             "updatedAt": now,
         }
     )
-    return serialize_chat(created_chat), True
+
+    response = {
+        "chat": serialize_chat(created_chat),
+        "emotion": emotion_result,
+        "tags": tags,
+        "musicRecommendations": music_recommendations,
+    }
+
+    return response, True
 
 
 def delete_chat(user_id, chat_id):

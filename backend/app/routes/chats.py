@@ -20,8 +20,8 @@ def append_chat_message_route(user_id):
     payload = request.get_json(silent=True) or {}
 
     try:
-        chat, created = append_chat_message(user_id, payload)
-        return jsonify({"chat": chat}), 201 if created else 200
+        result, created = append_chat_message(user_id, payload)
+        return jsonify(result), 201 if created else 200
     except ApiError as error:
         return jsonify({"message": error.message}), error.status_code
 
